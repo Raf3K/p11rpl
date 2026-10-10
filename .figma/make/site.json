@@ -1,0 +1,10 @@
+{
+  "description": "Shop PC parts, customize builds with compatibility checks, book maintenance, and diagnose issues using an intuitive tool for seamless PC care.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
