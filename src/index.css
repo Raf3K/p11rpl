@@ -291,6 +291,11 @@ footer p { color: #777; font-size: 12px; margin: 18px 0 0; }
 .cart-item strong { font-size: 12px; }
 .cart-item span { color: #6f6f76; font-size: 9px; }
 .cart-item > b { color: var(--blue); font: 500 11px "JetBrains Mono"; }
+.cart-item-end { align-items: flex-end; }
+.cart-item-end > b { color: var(--blue); font: 500 11px "JetBrains Mono"; }
+.cart-item-end > button { margin-top: 16px; padding: 0; display: flex; align-items: center; gap: 5px; color: #64748b; background: transparent; border: 0; font-size: 8px; text-transform: uppercase; }
+.cart-item-end > button:hover { color: #dc2626; }
+.cart-item-end > button svg { width: 13px; }
 .quantity { display: grid; grid-template-columns: 27px 28px 27px; margin-top: 10px; }
 .quantity button, .quantity b { height: 27px; border: 1px solid #33333a; background: transparent; color: white; display: grid; place-items: center; font-size: 11px; }
 .quantity b { border-left: 0; border-right: 0; font-weight: 400; }
@@ -298,6 +303,9 @@ footer p { color: #777; font-size: 12px; margin: 18px 0 0; }
 .cart-foot > div { display: flex; justify-content: space-between; align-items: center; }
 .cart-foot > div span { color: #8a8a90; font-size: 10px; text-transform: uppercase; }
 .cart-foot > div strong { font-size: 25px; }
+.cart-foot > div b { color: #0f172a; font-size: 11px; }
+.cart-foot .cart-total { margin: 15px 0 20px; padding-top: 15px; border-top: 1px solid #dbe3ee; }
+.cart-foot .cart-total strong { color: var(--blue); }
 .cart-foot > p { color: #66666c; font-size: 9px; margin: 7px 0 20px; }
 .cart-foot .btn { width: 100%; }
 .continue-shopping { width: 100%; border: 0; background: transparent; color: #888; font-size: 9px; text-transform: uppercase; padding: 17px 0 0; }
@@ -1052,4 +1060,3225 @@ footer p { color: #777; font-size: 12px; margin: 18px 0 0; }
   .consult-calendar > div, .consult-times > div { overflow-x: auto; }
   .consult-calendar button, .consult-times button { min-width: 62px; }
   .shared-build { max-width: 95%; }
+}
+
+/* Universal light theme */
+:root {
+  color: #0f172a;
+  background: #f8fafc;
+  --black: #0f172a;
+  --white: #ffffff;
+  --paper: #f8fafc;
+  --line: #dbe3ee;
+  --muted: #64748b;
+}
+
+body,
+.customer-portal,
+.dashboard-shell,
+.expert-page,
+.prebuilt-catalog {
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.site-header,
+footer,
+.dashboard-nav,
+.portal-head,
+.prebuilt-catalog-head,
+.prebuilt-detail,
+.expert-hero,
+.builder-page,
+.checkout-page,
+.order-complete,
+.product-page-dark,
+.login-page,
+.diagnostic-aside,
+.service-strip,
+.prebuilt-section,
+.cart-drawer,
+.cart-foot,
+.support-top,
+.warranty-layout aside,
+.restricted-panel,
+.detail-grid > div,
+.net-profit,
+.range-menu,
+.mobile-drawer {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #dbe3ee;
+}
+
+.site-header {
+  box-shadow: 0 1px 0 #dbe3ee, 0 8px 24px #0f172a0a;
+}
+
+.desktop-nav a,
+.footer-links,
+footer p,
+.dashboard-nav nav button,
+.admin-user small,
+.portal-user small {
+  color: #64748b;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active,
+.footer-links a:hover {
+  color: #0066ff;
+}
+
+.global-search,
+.search-results,
+.search-results img {
+  color: #0f172a;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.global-search input,
+.search-results a strong {
+  color: #0f172a;
+}
+
+.global-search input::placeholder,
+.search-results > .mono,
+.search-results a small,
+.search-results .view-all-results {
+  color: #64748b;
+}
+
+.search-category {
+  color: #0066ff;
+  border-color: #0066ff;
+}
+
+.search-results {
+  box-shadow: 0 24px 55px #0f172a1f;
+}
+
+.search-results > a:not(.view-all-results),
+.search-results .view-all-results {
+  border-color: #e2e8f0;
+}
+
+.icon-btn:hover {
+  color: #0066ff;
+  background: #eff6ff;
+}
+
+.btn-light {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.btn-light:hover {
+  background: #0052cc;
+}
+
+.tag {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.stock-live,
+.stock-out {
+  color: #0066ff;
+}
+
+input[type="checkbox"],
+input[type="range"] {
+  accent-color: #0066ff;
+}
+
+.hero {
+  color: #0f172a;
+  background: #ffffff;
+}
+
+.hero > img {
+  filter: grayscale(.25) contrast(.9);
+  opacity: .5;
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, #ffffff 0%, #fffffff2 38%, #ffffff59 72%), linear-gradient(0deg, #ffffffd9, transparent 55%);
+}
+
+.hero p,
+.hero-index,
+.hero .eyebrow.light {
+  color: #475569;
+}
+
+.hero .btn-light {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.hero .btn-light:hover {
+  background: #0052cc;
+}
+
+.btn-glass {
+  color: #0066ff;
+  background: #ffffffcc;
+  border-color: #0066ff;
+}
+
+.category-card:hover,
+.service-link:hover {
+  color: #0066ff;
+  background: #eff6ff;
+}
+
+.catalog-tabs button.active,
+.prebuilt-filters > div:first-child button.active,
+.order-tabs button.active,
+.consult-tabs button.active {
+  color: #0066ff;
+  box-shadow: inset 0 -2px #0066ff;
+}
+
+.part-option:hover,
+.part-option.selected,
+.symptom-grid button.active,
+.consult-type button.active {
+  border-color: #0066ff;
+}
+
+.symptom-grid button.active {
+  color: #0066ff;
+  background: #eff6ff;
+}
+
+.category-number,
+.tag.dark,
+.outline-tag,
+.image-label,
+.image-count,
+.active-order-image .mono {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.prebuilt-section,
+.service-strip {
+  border-color: #dbe3ee;
+}
+
+.prebuilt-section .eyebrow,
+.service-strip .eyebrow.light,
+.prebuilt-info p,
+.service-link .mono,
+.service-link p {
+  color: #64748b;
+}
+
+.prebuilt-shade {
+  background: linear-gradient(0deg, #fffffff2 0%, #ffffff8f 45%, transparent 82%);
+}
+
+.prebuilt-info,
+.prebuilt-info h3,
+.prebuilt-info a,
+.prebuilt-info > span {
+  color: #0f172a;
+}
+
+.service-link {
+  border-color: #dbe3ee;
+}
+
+.builder-head .eyebrow.light,
+.builder-head .mono,
+.builder-head > p,
+.product-tech-section .eyebrow.light,
+.prebuilt-catalog-head .eyebrow.light,
+.prebuilt-detail .eyebrow.light,
+.expert-hero .eyebrow.light,
+.checkout-page .eyebrow.light,
+.order-complete .eyebrow.light,
+.diagnostic-aside .eyebrow.light,
+.login-visual .eyebrow.light,
+.portal-head .eyebrow.light {
+  color: #0066ff;
+}
+
+.builder-progress {
+  border-color: #cbd5e1;
+}
+
+.builder-progress button,
+.builder-progress .done {
+  color: #64748b;
+}
+
+.builder-progress .active {
+  color: #0066ff;
+  border-top-color: #0066ff;
+}
+
+.builder-progress button > span {
+  border-color: #cbd5e1;
+}
+
+.build-summary {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #dbe3ee;
+  box-shadow: 0 14px 35px #0f172a0d;
+}
+
+.summary-title,
+.totals,
+.compat-box {
+  border-color: #dbe3ee;
+}
+
+.build-list strong,
+.build-list b,
+.totals div:last-child {
+  color: #0f172a;
+}
+
+.build-list span,
+.compat-box span,
+.totals div {
+  color: #64748b;
+}
+
+.build-summary .btn-outline {
+  color: #0066ff;
+  border-color: #0066ff;
+}
+
+.radio > span,
+.fake-qr i.on,
+.mini-qr i.on {
+  background: #0066ff;
+}
+
+.tier-list > button.active,
+.calendar-days button.active,
+.time-grid button.active,
+.consult-calendar button.active,
+.consult-times button.active {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.calendar-days button.active strong,
+.consult-calendar button.active strong {
+  color: #ffffff;
+}
+
+.diagnostic-aside > p,
+.diagnostic-progress {
+  color: #64748b;
+}
+
+.diagnostic-progress i {
+  background: #cbd5e1;
+}
+
+.result-icon {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.cart-layer,
+.modal-backdrop,
+.admin-modal-layer,
+.detail-layer {
+  background: #dbeafecc;
+}
+
+.cart-drawer {
+  box-shadow: -24px 0 70px #0f172a1f;
+}
+
+.cart-head,
+.cart-item,
+.cart-foot {
+  border-color: #e2e8f0;
+}
+
+.cart-head button,
+.quantity button,
+.quantity b {
+  color: #0f172a;
+}
+
+.quantity button,
+.quantity b {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.cart-item span,
+.cart-foot p,
+.continue-shopping,
+.cart-foot > div span {
+  color: #64748b;
+}
+
+.cart-item > img {
+  background: #f1f5f9;
+}
+
+.login-page {
+  background: #f8fafc;
+}
+
+.login-visual {
+  color: #0f172a;
+  border-color: #dbe3ee;
+}
+
+.login-grid {
+  opacity: .55;
+  background-image: linear-gradient(#dbeafe 1px, transparent 1px), linear-gradient(90deg, #dbeafe 1px, transparent 1px);
+}
+
+.login-visual > p,
+.login-stats span,
+.login-card > small,
+.login-options label,
+.login-options button {
+  color: #64748b;
+}
+
+.login-card > label {
+  color: #475569;
+}
+
+.login-card > label > input,
+.password-field {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.password-field input {
+  color: #0f172a;
+}
+
+.auth-tabs {
+  border-color: #cbd5e1;
+}
+
+.auth-tabs button {
+  color: #64748b;
+}
+
+.auth-tabs button.active {
+  color: #0066ff;
+}
+
+.login-error {
+  color: #0f172a;
+}
+
+.dashboard-nav {
+  box-shadow: inset -1px 0 #dbe3ee;
+}
+
+.dashboard-nav > div:first-child,
+.admin-user {
+  border-color: #dbe3ee;
+}
+
+.dashboard-nav nav button.active {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.range-menu {
+  box-shadow: 0 15px 35px #0f172a1f;
+}
+
+.panel-heading .range-menu button {
+  color: #475569;
+  background: #ffffff;
+}
+
+.panel-heading .range-menu button:hover {
+  color: #0066ff;
+  background: #eff6ff;
+}
+
+.bar-chart i {
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.net-profit,
+.restricted-panel,
+.detail-grid > div {
+  background: #f1f5f9;
+}
+
+.net-profit strong,
+.restricted-panel .mono {
+  color: #0066ff;
+}
+
+.restricted-panel p,
+.detail-grid span,
+.detail-grid small {
+  color: #64748b;
+}
+
+.banner-preview {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.banner-preview img {
+  filter: grayscale(.2);
+  opacity: .35;
+}
+
+.banner-preview p {
+  color: #475569;
+}
+
+.portal-head {
+  background: #ffffff;
+  border-bottom: 1px solid #dbe3ee;
+}
+
+.portal-user {
+  border-color: #cbd5e1;
+}
+
+.portal-user a {
+  color: #0066ff;
+}
+
+.pickup-code {
+  color: #0f172a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.pickup-code small {
+  color: #64748b;
+}
+
+.warranty-layout aside {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.warranty-layout aside p,
+.warranty-layout aside > div {
+  color: #475569;
+  border-color: #bfdbfe;
+}
+
+.checkout-top {
+  border-color: #dbe3ee;
+}
+
+.checkout-steps {
+  color: #94a3b8;
+}
+
+.checkout-steps .active {
+  color: #0066ff;
+}
+
+.checkout-steps i {
+  background: #cbd5e1;
+}
+
+.checkout-section,
+.checkout-summary,
+.fulfillment-options > button,
+.checkout-fields input,
+.pickup-panel,
+.pay-store-panel,
+.payment-tabs button {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #dbe3ee;
+}
+
+.checkout-section,
+.checkout-summary {
+  box-shadow: 0 12px 35px #0f172a0a;
+}
+
+.checkout-section-title p,
+.checkout-fields label,
+.fulfillment-options button span,
+.pickup-panel span,
+.pay-store-panel p,
+.summary-items span,
+.summary-costs > div,
+.secure-note {
+  color: #64748b;
+}
+
+.fulfillment-options > button.active {
+  color: #0066ff;
+  background: #eff6ff;
+  border-color: #0066ff;
+}
+
+.payment-tabs button.active {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.summary-items > div,
+.summary-costs,
+.summary-costs .summary-total {
+  border-color: #e2e8f0;
+}
+
+.summary-costs b,
+.summary-costs .summary-total {
+  color: #0f172a;
+}
+
+.order-complete > p {
+  color: #64748b;
+}
+
+.order-complete .btn-light {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.product-main-image,
+.product-thumbnails button,
+.system-image {
+  background: #f1f5f9;
+  border-color: #dbe3ee;
+}
+
+.product-info-dark > p,
+.product-crumbs,
+.product-price-dark > span,
+.product-price-dark small,
+.key-specs span,
+.compatibility-dark div span,
+.product-trust {
+  color: #64748b;
+}
+
+.key-specs,
+.key-specs div,
+.compatibility-dark,
+.product-tech-section,
+.dark-specs,
+.dark-specs > div {
+  border-color: #dbe3ee;
+}
+
+.dark-specs h3,
+.dark-specs strong {
+  color: #0f172a;
+}
+
+.compat-check {
+  color: #0066ff;
+  background: #dbeafe;
+}
+
+.support-top,
+.support-top button {
+  color: #0f172a;
+}
+
+.status-dot {
+  color: #0066ff;
+  background: #0066ff;
+}
+
+.support-top {
+  background: #eff6ff;
+}
+
+.support-top small {
+  color: #64748b;
+}
+
+.user-message,
+.support-compose button,
+.full-chat-compose button,
+.expert-avatar {
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.prebuilt-catalog-head p,
+.prebuilt-detail-copy > p,
+.expert-hero > p,
+.expert-status,
+.warranty-band p,
+.light-link {
+  color: #64748b;
+}
+
+.prebuilt-detail-image {
+  background: #f1f5f9;
+}
+
+.prebuilt-detail-image img {
+  filter: grayscale(.25);
+  opacity: .75;
+}
+
+.benchmark-row,
+.benchmark-row div {
+  border-color: #dbe3ee;
+}
+
+.expert-status > span,
+.chat-heading > .status-dot {
+  background: #0066ff;
+}
+
+.expert-status b {
+  color: #0f172a;
+}
+
+.mobile-drawer > a,
+.drawer-top {
+  border-color: #dbe3ee;
+}
+
+@media (max-width: 900px) {
+  .hero-overlay {
+    background: linear-gradient(0deg, #ffffff 0%, #ffffffb8 72%, #ffffff73);
+  }
+}
+
+/* Electric blue global navigation and footer */
+.site-header,
+footer,
+.mobile-drawer {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #ffffff38;
+}
+
+.site-header {
+  box-shadow: 0 1px 0 #ffffff38, 0 8px 24px #0f172a14;
+}
+
+.site-header .brand-name,
+footer .brand-name,
+.mobile-drawer .brand-name {
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: #ffffff;
+}
+
+.site-header .brand-mark,
+footer .brand-mark,
+.mobile-drawer .brand-mark {
+  border-color: #ffffff;
+}
+
+.site-header .brand-mark span,
+footer .brand-mark span,
+.mobile-drawer .brand-mark span {
+  background: #ffffff;
+}
+
+.desktop-nav a,
+.desktop-nav a:hover,
+.desktop-nav a.active,
+.site-header .icon-btn,
+footer p,
+.footer-links,
+.footer-links a,
+.mobile-drawer > a,
+.drawer-top .icon-btn {
+  color: #ffffff;
+}
+
+.desktop-nav a {
+  opacity: .78;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active {
+  opacity: 1;
+}
+
+.desktop-nav a.active {
+  box-shadow: inset 0 -2px #ffffff;
+}
+
+.site-header .icon-btn:hover,
+.drawer-top .icon-btn:hover {
+  color: #ffffff;
+  background: #ffffff24;
+}
+
+.global-search {
+  color: #ffffff;
+  background: #ffffff1f;
+  border-color: #ffffff59;
+}
+
+.global-search:focus-within {
+  border-color: #ffffff;
+}
+
+.global-search > svg,
+.global-search input,
+.global-search input::placeholder {
+  color: #ffffff;
+}
+
+.global-search input::placeholder {
+  opacity: .75;
+}
+
+.search-results {
+  color: #ffffff;
+  background: #0066ff;
+  border-color: #ffffff59;
+  box-shadow: 0 24px 55px #0f172a33;
+}
+
+.search-results img {
+  background: #ffffff1f;
+}
+
+.search-results a strong,
+.search-results a small,
+.search-results > .mono,
+.search-results > p,
+.search-results .view-all-results,
+.search-results a b,
+.search-category,
+.stock-live,
+.stock-out {
+  color: #ffffff;
+}
+
+.search-category {
+  border-color: #ffffff99;
+}
+
+.search-results > a:not(.view-all-results),
+.search-results .view-all-results,
+.mobile-drawer > a {
+  border-color: #ffffff38;
+}
+
+footer {
+  box-shadow: inset 0 1px #ffffff38;
+}
+
+/* Soft off-white content surfaces */
+:root {
+  background: #e5e7eb;
+  --paper: #e5e7eb;
+}
+
+body,
+main,
+.customer-portal,
+.dashboard-shell,
+.expert-page,
+.prebuilt-catalog,
+.login-page,
+.builder-page,
+.checkout-page,
+.order-complete,
+.product-page-dark,
+.prebuilt-detail,
+.diagnostic-page {
+  background: #e5e7eb;
+}
+
+.hero,
+.prebuilt-section,
+.service-strip,
+.portal-head,
+.prebuilt-catalog-head,
+.expert-hero,
+.diagnostic-aside,
+.login-visual,
+.dashboard-nav,
+.dashboard-header,
+.cart-drawer,
+.cart-foot,
+.support-top,
+.warranty-layout aside,
+.restricted-panel,
+.detail-grid > div,
+.net-profit,
+.build-summary,
+.checkout-section,
+.checkout-summary {
+  background: #f3f4f6;
+}
+
+.product-card,
+.part-option,
+.code-modal,
+.service-booking,
+.time-grid button,
+.symptom-grid button,
+.metric-grid article,
+.sales-chart,
+.financial-panel,
+.recent-orders,
+.orders-panel,
+.inventory-table,
+.product-form-modal,
+.date-range-modal,
+.detail-line,
+.management-card,
+.banner-manager,
+.portal-tabs,
+.portal-tabs button,
+.active-order-card,
+.invoice-detail,
+.invoice-actions > button,
+.portal-form,
+.address-grid article,
+.payment-methods article,
+.warranty-layout form,
+.support-popover,
+.expert-message,
+.system-card,
+.consultation-hub,
+.shared-build,
+.consult-type button,
+.consult-times button {
+  background: #f3f4f6;
+}
+
+.panel-heading button,
+.inventory-tools > div,
+.inventory-tools > button,
+.admin-form-grid input,
+.admin-form-grid select,
+.admin-form-grid textarea,
+.date-picker-field input,
+.portal-form input,
+.warranty-layout input,
+.warranty-layout select,
+.warranty-layout textarea,
+.checkout-fields input,
+.fulfillment-options > button,
+.pickup-panel,
+.pay-store-panel,
+.payment-tabs button,
+.login-card > label > input,
+.password-field,
+.quantity button,
+.quantity b {
+  background: #f9fafb;
+}
+
+.builder-selection,
+.question-panel,
+.booking-panel,
+.tier-list,
+.prebuilt-breakdown,
+.faq-section,
+.full-chat-messages,
+.support-messages {
+  background: #eef0f3;
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, #f3f4f6 0%, #f3f4f6ed 38%, #f3f4f659 72%), linear-gradient(0deg, #f3f4f6d9, transparent 55%);
+}
+
+.banner-preview,
+.product-main-image,
+.product-thumbnails button,
+.system-image,
+.prebuilt-detail-image,
+.product-visual,
+.part-icon {
+  background: #e5e7eb;
+}
+
+@media (max-width: 900px) {
+  .hero-overlay {
+    background: linear-gradient(0deg, #f3f4f6 0%, #f3f4f6c7 72%, #f3f4f67a);
+  }
+}
+
+/* Cart authentication and inventory state controls */
+.empty-cart {
+  flex: 1;
+  padding: 48px 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.empty-cart > span {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  color: #0066ff;
+  background: #dbeafe;
+  border-radius: 50%;
+}
+
+.empty-cart > span svg {
+  width: 30px;
+  height: 30px;
+}
+
+.empty-cart h3 {
+  margin: 24px 0 8px;
+  font-size: 26px;
+  letter-spacing: -.04em;
+}
+
+.empty-cart p {
+  max-width: 310px;
+  margin: 0 0 26px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.empty-cart .btn {
+  width: 100%;
+}
+
+.cart-toast {
+  position: fixed;
+  z-index: 120;
+  right: 24px;
+  top: 94px;
+  min-width: 285px;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 12px;
+  color: #0f172a;
+  background: #f3f4f6;
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 18px 45px #0f172a24;
+}
+
+.cart-toast > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: #0066ff;
+}
+
+.cart-toast > span svg {
+  width: 18px;
+}
+
+.cart-toast > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cart-toast strong {
+  font-size: 11px;
+}
+
+.cart-toast button {
+  width: fit-content;
+  padding: 0;
+  color: #0066ff;
+  background: transparent;
+  border: 0;
+  font-size: 9px;
+  text-decoration: underline;
+}
+
+.inventory-filter {
+  min-width: 170px;
+  height: 43px;
+  padding: 0 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 10px;
+  color: #0f172a;
+  background: #f9fafb;
+  border: 1px solid #d4d4d0;
+}
+
+.inventory-filter > span {
+  color: #64748b;
+  font: 7px "JetBrains Mono";
+  text-transform: uppercase;
+}
+
+.inventory-filter select {
+  grid-column: 1;
+  min-width: 0;
+  padding: 0;
+  color: #0f172a;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  font-size: 9px;
+}
+
+.inventory-filter > svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 13px;
+  color: #0066ff;
+  pointer-events: none;
+}
+
+.stock-ok,
+.stock-low,
+.stock-out-admin {
+  width: fit-content;
+  padding: 6px 8px;
+  border: 1px solid;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.stock-ok {
+  color: #0066ff;
+  background: #eff6ff;
+  border-color: #0066ff;
+}
+
+.stock-low {
+  color: #9a6700;
+  background: #fff7d6;
+  border-color: #d6a500;
+}
+
+.stock-out-admin {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.stock-preview {
+  min-height: 67px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 10px;
+  background: #eef0f3;
+  border: 1px solid #cbd5e1;
+}
+
+.stock-preview > span {
+  color: #64748b;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.stock-preview > small {
+  grid-column: 1 / 3;
+  color: #64748b;
+  font: 8px "JetBrains Mono";
+}
+
+.inventory-empty {
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #64748b;
+}
+
+.inventory-empty svg {
+  width: 30px;
+  height: 30px;
+  color: #0066ff;
+}
+
+.inventory-empty strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.inventory-empty span {
+  font-size: 9px;
+}
+
+@media (max-width: 560px) {
+  .inventory-filter {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .cart-toast {
+    left: 12px;
+    right: 12px;
+    top: 78px;
+    min-width: 0;
+  }
+}
+
+/* Dual-theme navigation and community */
+:root {
+  --app-bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --ink: #0f172a;
+  --ink-muted: #64748b;
+  --border: #dbe3ee;
+  --accent: #0066ff;
+  --accent-contrast: #ffffff;
+  --header-bg: #0066ff;
+  --header-ink: #ffffff;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --app-bg: #000000;
+  --surface: #121212;
+  --surface-soft: #18181b;
+  --surface-inset: #27272a;
+  --ink: #ffffff;
+  --ink-muted: #a1a1aa;
+  --border: #3f3f46;
+  --accent: #ffffff;
+  --accent-contrast: #000000;
+  --header-bg: #000000;
+  --header-ink: #ffffff;
+  --black: #ffffff;
+  --white: #121212;
+  --paper: #000000;
+  --line: #3f3f46;
+  --muted: #a1a1aa;
+  --blue: #ffffff;
+  color-scheme: dark;
+}
+
+.site-header {
+  height: 76px;
+  padding: 0 3vw;
+  justify-content: flex-start;
+  gap: 22px;
+  color: var(--header-ink);
+  background: var(--header-bg);
+  border-color: color-mix(in srgb, var(--header-ink) 20%, transparent);
+  box-shadow: none;
+}
+
+footer {
+  color: #ffffff;
+  background: var(--header-bg);
+  border-color: color-mix(in srgb, #ffffff 20%, transparent);
+}
+
+footer .brand-name,
+footer .brand-logo,
+footer .footer-links,
+footer .footer-links a,
+footer p {
+  color: #ffffff;
+}
+
+footer .brand-name {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+footer .brand-mark {
+  border-color: #ffffff;
+}
+
+footer .brand-mark span {
+  background: #ffffff;
+}
+
+.site-header .brand-logo,
+.site-header .brand-name {
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.site-header .brand-mark {
+  border-color: #ffffff;
+}
+
+.site-header .brand-mark span {
+  background: #ffffff;
+}
+
+.desktop-nav {
+  gap: 18px;
+}
+
+.desktop-nav a,
+.desktop-nav a:hover,
+.desktop-nav a.active {
+  color: #ffffff;
+}
+
+.desktop-nav a {
+  opacity: .7;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a.active {
+  opacity: 1;
+}
+
+.desktop-nav a.active {
+  box-shadow: inset 0 -2px #ffffff;
+}
+
+.header-cart {
+  height: 42px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid #ffffff42;
+  font-size: 10px;
+}
+
+.header-cart b {
+  min-width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  color: #0066ff;
+  background: #ffffff;
+  border-radius: 50%;
+  font: 9px "JetBrains Mono";
+}
+
+:root[data-theme="dark"] .header-cart b {
+  color: #000000;
+}
+
+.site-header .global-search {
+  margin-left: auto;
+  width: clamp(250px, 25vw, 390px);
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+.site-header .global-search input {
+  color: #0f172a;
+}
+
+.site-header .global-search input::placeholder {
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .site-header .global-search {
+  background: #121212;
+  border-color: #333333;
+}
+
+:root[data-theme="dark"] .site-header .global-search input {
+  color: #ffffff;
+}
+
+.header-actions {
+  position: relative;
+}
+
+.theme-toggle {
+  height: 42px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid #ffffff42;
+}
+
+.theme-toggle > span {
+  width: 31px;
+  height: 17px;
+  padding: 2px;
+  display: flex;
+  justify-content: flex-start;
+  background: #ffffff45;
+  border-radius: 12px;
+}
+
+.theme-toggle i {
+  width: 13px;
+  height: 13px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform .2s;
+}
+
+:root[data-theme="dark"] .theme-toggle i {
+  transform: translateX(14px);
+}
+
+.login-pill,
+.account-avatar {
+  min-height: 42px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0066ff;
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 24px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] .login-pill,
+:root[data-theme="dark"] .account-avatar {
+  color: #000000;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 220px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px #00000038;
+}
+
+.account-menu > strong {
+  font-size: 12px;
+}
+
+.account-menu > span {
+  margin: 3px 0 13px;
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.account-menu a {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+}
+
+.account-menu a svg {
+  width: 15px;
+}
+
+.account-menu > button {
+  margin-top: 7px;
+  padding: 10px;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.mobile-drawer-tools {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.mobile-drawer-tools button,
+.mobile-drawer-tools a {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+}
+
+.mobile-drawer-tools svg {
+  width: 17px;
+}
+
+.search-results {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .search-results a strong,
+:root[data-theme="dark"] .search-results a b,
+:root[data-theme="dark"] .search-category,
+:root[data-theme="dark"] .stock-live,
+:root[data-theme="dark"] .stock-out {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .search-results > a,
+:root[data-theme="dark"] .search-results .view-all-results {
+  border-color: #333333;
+}
+
+.community-page,
+.thread-page {
+  min-height: calc(100vh - 76px);
+  color: var(--ink);
+  background: var(--app-bg);
+}
+
+.community-hero {
+  min-height: 380px;
+  padding: 72px max(5vw, calc((100vw - 1400px) / 2));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 50px;
+  color: #ffffff;
+  background: #0066ff;
+}
+
+:root[data-theme="dark"] .community-hero {
+  background: #000000;
+  border-bottom: 1px solid #333333;
+}
+
+.community-hero h1 {
+  max-width: 900px;
+  margin: 25px 0 20px;
+  font-size: clamp(48px, 6.3vw, 92px);
+  line-height: .84;
+  letter-spacing: -.07em;
+}
+
+.community-hero h1 em {
+  font-style: normal;
+  opacity: .45;
+}
+
+.community-hero p {
+  max-width: 650px;
+  margin: 0;
+  color: #ffffffbd;
+  line-height: 1.6;
+}
+
+.community-hero .btn {
+  flex: 0 0 auto;
+}
+
+.community-layout {
+  max-width: 1400px;
+  margin: auto;
+  padding: 70px 5vw 120px;
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr);
+  gap: 55px;
+}
+
+.forum-sidebar {
+  position: sticky;
+  top: 106px;
+  align-self: start;
+}
+
+.forum-sidebar > .mono {
+  display: block;
+  margin-bottom: 17px;
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.forum-sidebar > button {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 12px;
+  display: grid;
+  grid-template-columns: 20px 1fr 14px;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  text-align: left;
+  font-size: 10px;
+}
+
+.forum-sidebar > button svg {
+  width: 15px;
+}
+
+.forum-sidebar > button svg:last-child {
+  opacity: 0;
+}
+
+.forum-sidebar > button.active {
+  color: var(--accent-contrast);
+  background: var(--accent);
+}
+
+.forum-sidebar > button.active svg:last-child {
+  opacity: 1;
+}
+
+.forum-sidebar > div {
+  margin-top: 32px;
+  padding: 20px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.forum-sidebar > div strong {
+  font-size: 11px;
+}
+
+.forum-sidebar > div p {
+  color: var(--ink-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.forum-sidebar > div a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 9px;
+}
+
+.feed-toolbar {
+  min-height: 58px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.feed-toolbar > div {
+  display: flex;
+  height: 58px;
+}
+
+.feed-toolbar button {
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+}
+
+.feed-toolbar button svg {
+  width: 14px;
+}
+
+.feed-toolbar button.active {
+  color: var(--accent);
+  box-shadow: inset 0 -2px var(--accent);
+}
+
+.feed-toolbar > .mono {
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.discussion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discussion-card {
+  padding: 25px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: transform .2s, border-color .2s;
+}
+
+.discussion-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.discussion-author,
+.thread-author {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.discussion-author > span,
+.thread-author > span,
+.comment-avatar,
+.nested-comment > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-radius: 50%;
+  font: 9px "JetBrains Mono";
+  flex: 0 0 auto;
+}
+
+.discussion-author > div,
+.thread-author > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.discussion-author strong,
+.thread-author strong {
+  font-size: 10px;
+}
+
+.discussion-author strong b,
+.thread-author strong b,
+.comment-meta strong b,
+.nested-comment strong b {
+  margin-left: 7px;
+  padding: 3px 6px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  font: 7px "JetBrains Mono";
+  text-transform: uppercase;
+}
+
+.discussion-author small,
+.thread-author small {
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.discussion-author small em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.discussion-body {
+  margin: 22px 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 25px;
+}
+
+.discussion-body h2 {
+  margin: 0 0 10px;
+  font-size: 23px;
+  letter-spacing: -.035em;
+}
+
+.discussion-body p {
+  max-width: 760px;
+  margin: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.discussion-body img {
+  width: 150px;
+  height: 90px;
+  object-fit: cover;
+  filter: grayscale(.25);
+}
+
+.discussion-engagement {
+  display: flex;
+  gap: 7px;
+}
+
+.discussion-engagement button,
+.discussion-engagement a,
+.thread-actions button {
+  min-height: 34px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-muted);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 9px;
+}
+
+.discussion-engagement svg,
+.thread-actions svg {
+  width: 14px;
+}
+
+.discussion-engagement button.active,
+.thread-actions button.active {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.forum-empty {
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.forum-empty > svg {
+  width: 38px;
+  height: 38px;
+  color: var(--accent);
+}
+
+.forum-empty h2 {
+  margin: 20px 0 5px;
+}
+
+.forum-empty p {
+  margin-bottom: 24px;
+  color: var(--ink-muted);
+}
+
+.forum-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  padding: 25px;
+  display: grid;
+  place-items: center;
+  background: #000000c7;
+  backdrop-filter: blur(8px);
+}
+
+.discussion-modal {
+  width: min(720px, 100%);
+  max-height: 92vh;
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.discussion-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.discussion-modal-head .mono {
+  color: var(--accent);
+  font-size: 8px;
+}
+
+.discussion-modal h2 {
+  margin: 9px 0 4px;
+  font-size: 32px;
+  letter-spacing: -.05em;
+}
+
+.discussion-modal-head button {
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+}
+
+.discussion-modal > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--ink-muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.discussion-modal > label > input,
+.discussion-modal > label > select {
+  height: 48px;
+  padding: 0 13px;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font: 11px "Space Grotesk";
+}
+
+.editor-shell {
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+}
+
+.editor-toolbar {
+  min-height: 42px;
+  padding: 5px;
+  display: flex;
+  gap: 3px;
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-toolbar button {
+  width: 33px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 0;
+}
+
+.editor-toolbar button:hover {
+  color: var(--accent);
+  background: var(--surface);
+}
+
+.editor-toolbar svg {
+  width: 15px;
+}
+
+.editor-shell textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 14px;
+  resize: vertical;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: 12px/1.6 "Space Grotesk";
+}
+
+.discussion-upload {
+  min-height: 115px;
+  position: relative;
+  display: grid !important;
+  place-items: center;
+  align-content: center;
+  gap: 6px !important;
+  text-align: center;
+  background: var(--surface-soft);
+  border: 1px dashed var(--border);
+}
+
+.discussion-upload svg {
+  width: 23px;
+  color: var(--accent);
+}
+
+.discussion-upload strong {
+  color: var(--ink);
+  font-size: 10px;
+  text-transform: none;
+}
+
+.discussion-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.discussion-upload img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.discussion-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.discussion-actions > button:first-child {
+  padding: 0 20px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.thread-shell {
+  max-width: 1200px;
+  margin: auto;
+  padding: 55px 5vw 120px;
+}
+
+.thread-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.thread-breadcrumb a {
+  color: var(--accent);
+}
+
+.thread-breadcrumb svg {
+  width: 13px;
+}
+
+.thread-header {
+  padding: 50px 0 42px;
+  border-bottom: 1px solid var(--border);
+}
+
+.thread-category {
+  padding: 7px 9px;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  font: 8px "JetBrains Mono";
+  text-transform: uppercase;
+}
+
+.thread-header h1 {
+  max-width: 1000px;
+  margin: 25px 0 32px;
+  font-size: clamp(46px, 6vw, 76px);
+  line-height: .94;
+  letter-spacing: -.06em;
+}
+
+.thread-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 70px;
+  padding: 50px 0 70px;
+}
+
+.thread-content {
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.thread-content .thread-lead {
+  margin-top: 0;
+  color: var(--ink);
+  font-size: 21px;
+  line-height: 1.55;
+}
+
+.thread-content p {
+  color: var(--ink-muted);
+}
+
+.thread-content > img {
+  width: 100%;
+  max-height: 480px;
+  margin: 28px 0;
+  object-fit: cover;
+}
+
+.thread-content h2 {
+  margin: 40px 0 5px;
+  font-size: 29px;
+  letter-spacing: -.04em;
+}
+
+.thread-content pre {
+  margin: 25px 0;
+  padding: 22px;
+  overflow-x: auto;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border-left: 3px solid var(--accent);
+  font: 11px/1.8 "JetBrains Mono";
+}
+
+.thread-actions {
+  margin-top: 42px;
+  padding-top: 20px;
+  display: flex;
+  gap: 7px;
+  border-top: 1px solid var(--border);
+}
+
+.thread-aside {
+  position: sticky;
+  top: 105px;
+  height: fit-content;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.thread-aside > .mono {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--accent);
+  font-size: 8px;
+}
+
+.thread-aside > div {
+  padding: 13px 0;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+}
+
+.thread-aside > div span {
+  color: var(--ink-muted);
+}
+
+.thread-aside > a {
+  margin-top: 15px;
+  padding-top: 15px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--accent);
+  border-top: 1px solid var(--border);
+  font-size: 9px;
+}
+
+.comments-section {
+  padding-top: 55px;
+  border-top: 1px solid var(--border);
+}
+
+.comments-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.comments-heading .mono {
+  color: var(--accent);
+  font-size: 8px;
+}
+
+.comments-heading h2 {
+  margin: 8px 0 0;
+  font-size: 36px;
+}
+
+.comments-heading > span {
+  color: var(--ink-muted);
+  font-size: 9px;
+}
+
+.reply-composer {
+  margin: 30px 0;
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.reply-composer .editor-toolbar {
+  grid-column: 1 / 3;
+  margin: 0 -16px;
+}
+
+.reply-composer textarea {
+  min-height: 95px;
+  padding: 16px 0;
+  resize: vertical;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: 12px/1.6 "Space Grotesk";
+}
+
+.reply-composer .btn {
+  align-self: end;
+}
+
+.comment {
+  padding: 26px 0;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comment-meta strong,
+.nested-comment strong {
+  font-size: 10px;
+}
+
+.comment-meta > span {
+  color: var(--ink-muted);
+  font-size: 8px;
+}
+
+.comment p {
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.comment button,
+.nested-comment button {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  background: transparent;
+  border: 0;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.comment button svg {
+  width: 13px;
+}
+
+.nested-comment {
+  margin-top: 22px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 12px;
+  background: var(--surface);
+  border-left: 2px solid var(--accent);
+}
+
+.nested-comment > span {
+  width: 32px;
+  height: 32px;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] main,
+:root[data-theme="dark"] .customer-portal,
+:root[data-theme="dark"] .dashboard-shell,
+:root[data-theme="dark"] .expert-page,
+:root[data-theme="dark"] .prebuilt-catalog,
+:root[data-theme="dark"] .login-page,
+:root[data-theme="dark"] .builder-page,
+:root[data-theme="dark"] .checkout-page,
+:root[data-theme="dark"] .order-complete,
+:root[data-theme="dark"] .product-page-dark,
+:root[data-theme="dark"] .prebuilt-detail,
+:root[data-theme="dark"] .diagnostic-page {
+  color: #ffffff;
+  background: #000000;
+}
+
+:root[data-theme="dark"] .hero,
+:root[data-theme="dark"] .prebuilt-section,
+:root[data-theme="dark"] .service-strip,
+:root[data-theme="dark"] .portal-head,
+:root[data-theme="dark"] .prebuilt-catalog-head,
+:root[data-theme="dark"] .expert-hero,
+:root[data-theme="dark"] .diagnostic-aside,
+:root[data-theme="dark"] .login-visual,
+:root[data-theme="dark"] .dashboard-nav,
+:root[data-theme="dark"] .dashboard-header,
+:root[data-theme="dark"] .cart-drawer,
+:root[data-theme="dark"] .cart-foot,
+:root[data-theme="dark"] .support-top,
+:root[data-theme="dark"] .warranty-layout aside,
+:root[data-theme="dark"] .restricted-panel,
+:root[data-theme="dark"] .detail-grid > div,
+:root[data-theme="dark"] .net-profit,
+:root[data-theme="dark"] .build-summary,
+:root[data-theme="dark"] .checkout-section,
+:root[data-theme="dark"] .checkout-summary,
+:root[data-theme="dark"] footer {
+  color: #ffffff;
+  background: #121212;
+  border-color: #333333;
+}
+
+:root[data-theme="dark"] .product-card,
+:root[data-theme="dark"] .part-option,
+:root[data-theme="dark"] .code-modal,
+:root[data-theme="dark"] .service-booking,
+:root[data-theme="dark"] .time-grid button,
+:root[data-theme="dark"] .symptom-grid button,
+:root[data-theme="dark"] .metric-grid article,
+:root[data-theme="dark"] .sales-chart,
+:root[data-theme="dark"] .financial-panel,
+:root[data-theme="dark"] .recent-orders,
+:root[data-theme="dark"] .orders-panel,
+:root[data-theme="dark"] .inventory-table,
+:root[data-theme="dark"] .product-form-modal,
+:root[data-theme="dark"] .date-range-modal,
+:root[data-theme="dark"] .management-card,
+:root[data-theme="dark"] .banner-manager,
+:root[data-theme="dark"] .portal-tabs,
+:root[data-theme="dark"] .portal-tabs button,
+:root[data-theme="dark"] .active-order-card,
+:root[data-theme="dark"] .invoice-detail,
+:root[data-theme="dark"] .portal-form,
+:root[data-theme="dark"] .address-grid article,
+:root[data-theme="dark"] .payment-methods article,
+:root[data-theme="dark"] .warranty-layout form,
+:root[data-theme="dark"] .support-popover,
+:root[data-theme="dark"] .consultation-hub,
+:root[data-theme="dark"] .consult-type button {
+  color: #ffffff;
+  background: #121212;
+  border-color: #333333;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .question-panel,
+:root[data-theme="dark"] .builder-selection,
+:root[data-theme="dark"] .booking-panel,
+:root[data-theme="dark"] .tier-list,
+:root[data-theme="dark"] .full-chat-messages,
+:root[data-theme="dark"] .support-messages,
+:root[data-theme="dark"] .inventory-filter {
+  color: #ffffff;
+  background: #1e1e1e;
+  border-color: #333333;
+}
+
+:root[data-theme="dark"] .btn-dark,
+:root[data-theme="dark"] .btn-light,
+:root[data-theme="dark"] .support-trigger,
+:root[data-theme="dark"] .portal-tabs button.active,
+:root[data-theme="dark"] .stock-ok,
+:root[data-theme="dark"] .cart-toast > span {
+  color: #000000;
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .btn-outline {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .brand-name {
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+:root[data-theme="dark"] .brand-mark {
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .brand-mark span {
+  background: #ffffff;
+}
+
+:root[data-theme="dark"] .hero-overlay {
+  background: linear-gradient(90deg, #000000 0%, #000000e8 38%, #00000059 72%), linear-gradient(0deg, #000000d9, transparent 55%);
+}
+
+:root[data-theme="dark"] .hero,
+:root[data-theme="dark"] .hero p,
+:root[data-theme="dark"] .hero .eyebrow.light,
+:root[data-theme="dark"] .page-head h1,
+:root[data-theme="dark"] .section-heading h2,
+:root[data-theme="dark"] .portal-section-head h2,
+:root[data-theme="dark"] .inventory-filter select {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .stock-ok {
+  color: #ffffff;
+  background: #1e1e1e;
+}
+
+:root[data-theme="dark"] .stock-low,
+:root[data-theme="dark"] .stock-out-admin {
+  color: #ffffff;
+  background: #1e1e1e;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] *,
+:root[data-theme="dark"] input[type="checkbox"],
+:root[data-theme="dark"] input[type="range"] {
+  accent-color: #ffffff;
+}
+
+:root[data-theme="dark"] .desktop-nav a:hover,
+:root[data-theme="dark"] .desktop-nav a.active,
+:root[data-theme="dark"] .footer-links a:hover,
+:root[data-theme="dark"] .search-category,
+:root[data-theme="dark"] .stock-live,
+:root[data-theme="dark"] .stock-out,
+:root[data-theme="dark"] .icon-btn:hover,
+:root[data-theme="dark"] .auth-tabs button.active,
+:root[data-theme="dark"] .login-visual .eyebrow.light,
+:root[data-theme="dark"] .portal-head .eyebrow.light,
+:root[data-theme="dark"] .builder-progress .active,
+:root[data-theme="dark"] .build-summary .btn-outline,
+:root[data-theme="dark"] .net-profit strong,
+:root[data-theme="dark"] .restricted-panel .mono,
+:root[data-theme="dark"] .portal-user a,
+:root[data-theme="dark"] .checkout-steps .active,
+:root[data-theme="dark"] .compat-check,
+:root[data-theme="dark"] .cart-head .mono,
+:root[data-theme="dark"] .cart-foot .cart-total strong,
+:root[data-theme="dark"] .cart-item-end > b,
+:root[data-theme="dark"] .cart-toast button,
+:root[data-theme="dark"] .inventory-filter > svg,
+:root[data-theme="dark"] .inventory-empty svg,
+:root[data-theme="dark"] .portal-section-head .mono {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .icon-btn:hover,
+:root[data-theme="dark"] .symptom-grid button.active,
+:root[data-theme="dark"] .panel-heading .range-menu button:hover,
+:root[data-theme="dark"] .pickup-code,
+:root[data-theme="dark"] .fulfillment-options > button.active,
+:root[data-theme="dark"] .compat-check,
+:root[data-theme="dark"] .empty-cart > span,
+:root[data-theme="dark"] .support-top {
+  color: #ffffff;
+  background: #1e1e1e;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .tag,
+:root[data-theme="dark"] .active-order-image .mono,
+:root[data-theme="dark"] .fake-qr i.on,
+:root[data-theme="dark"] .mini-qr i.on,
+:root[data-theme="dark"] .consult-times button.active,
+:root[data-theme="dark"] .result-icon,
+:root[data-theme="dark"] .dashboard-nav nav button.active,
+:root[data-theme="dark"] .bar-chart i,
+:root[data-theme="dark"] .payment-tabs button.active,
+:root[data-theme="dark"] .expert-avatar,
+:root[data-theme="dark"] .expert-status > span,
+:root[data-theme="dark"] .chat-heading > .status-dot,
+:root[data-theme="dark"] .status-dot,
+:root[data-theme="dark"] .cart-count {
+  color: #000000;
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .admin-modal-layer,
+:root[data-theme="dark"] .detail-layer {
+  background: #000000d9;
+}
+
+:root[data-theme="dark"] .login-grid {
+  background-image: linear-gradient(#333333 1px, transparent 1px), linear-gradient(90deg, #333333 1px, transparent 1px);
+}
+
+:root[data-theme="dark"] .warranty-layout aside,
+:root[data-theme="dark"] .pickup-code {
+  border-color: #333333;
+}
+
+@media (max-width: 1180px) {
+  .site-header {
+    gap: 12px;
+  }
+  .desktop-nav {
+    gap: 11px;
+  }
+  .desktop-nav a {
+    font-size: 10px;
+  }
+  .header-cart span,
+  .theme-toggle > svg {
+    display: none;
+  }
+  .site-header .global-search {
+    width: min(28vw, 300px);
+  }
+}
+
+@media (max-width: 900px) {
+  .header-cart,
+  .site-header .global-search,
+  .theme-toggle,
+  .login-pill,
+  .account-control {
+    display: none;
+  }
+  .site-header {
+    justify-content: space-between;
+  }
+  .header-actions {
+    margin-left: auto;
+  }
+  .community-hero {
+    min-height: 430px;
+    padding: 65px 28px;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .community-layout {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 35px 22px 80px;
+  }
+  .forum-sidebar {
+    position: static;
+    display: flex;
+    overflow-x: auto;
+  }
+  .forum-sidebar > .mono,
+  .forum-sidebar > div {
+    display: none;
+  }
+  .forum-sidebar > button {
+    width: auto;
+    min-width: max-content;
+    border: 1px solid var(--border);
+  }
+  .forum-sidebar > button svg:last-child {
+    display: none;
+  }
+  .thread-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .thread-aside {
+    position: static;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .community-hero h1 {
+    font-size: 49px;
+  }
+  .community-hero .btn {
+    width: 100%;
+  }
+  .feed-toolbar > .mono {
+    display: none;
+  }
+  .feed-toolbar button {
+    padding: 0 12px;
+  }
+  .discussion-card {
+    padding: 19px;
+  }
+  .discussion-author strong b {
+    display: block;
+    width: fit-content;
+    margin: 5px 0 0;
+  }
+  .discussion-body {
+    grid-template-columns: 1fr;
+  }
+  .discussion-body img {
+    width: 100%;
+    height: 160px;
+  }
+  .discussion-engagement button,
+  .discussion-engagement a {
+    flex: 1;
+    justify-content: center;
+  }
+  .discussion-modal {
+    padding: 22px;
+  }
+  .thread-shell {
+    padding: 35px 20px 80px;
+  }
+  .thread-header h1 {
+    font-size: 43px;
+  }
+  .thread-grid {
+    padding-top: 35px;
+  }
+  .thread-actions {
+    flex-wrap: wrap;
+  }
+  .reply-composer {
+    grid-template-columns: 1fr;
+  }
+  .reply-composer .editor-toolbar {
+    grid-column: 1;
+  }
+  .reply-composer .btn {
+    width: 100%;
+  }
+  .comments-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .comment {
+    grid-template-columns: 32px 1fr;
+  }
+}
+
+/* Dark theme contrast normalization */
+:root[data-theme="dark"] .site-header {
+  background: #000000;
+  border-color: #27272a;
+}
+
+:root[data-theme="dark"] .site-header .global-search,
+:root[data-theme="dark"] .site-header .global-search:focus-within {
+  color: #fafafa;
+  background: #18181b;
+  border-color: #3f3f46;
+  box-shadow: none;
+  outline: none;
+}
+
+:root[data-theme="dark"] .site-header .global-search > svg {
+  color: #e4e4e7;
+  background: transparent;
+  filter: none;
+}
+
+:root[data-theme="dark"] .site-header .global-search input,
+:root[data-theme="dark"] .site-header .global-search input:focus {
+  color: #fafafa;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+:root[data-theme="dark"] .site-header .global-search input::placeholder {
+  color: #a1a1aa;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .site-header .global-search input::selection {
+  color: #ffffff;
+  background: #3f3f46;
+}
+
+:root[data-theme="dark"] .site-header .global-search input:-webkit-autofill,
+:root[data-theme="dark"] .site-header .global-search input:-webkit-autofill:hover,
+:root[data-theme="dark"] .site-header .global-search input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fafafa;
+  caret-color: #fafafa;
+  box-shadow: 0 0 0 1000px #18181b inset;
+}
+
+:root[data-theme="dark"] .search-results {
+  color: #ffffff;
+  background: #121212;
+  border-color: #3f3f46;
+  box-shadow: 0 18px 45px #000000b3;
+}
+
+:root[data-theme="dark"] .search-results img {
+  background: #18181b;
+  border-color: #27272a;
+}
+
+:root[data-theme="dark"] .search-results > a:not(.view-all-results):hover,
+:root[data-theme="dark"] .search-results .view-all-results:hover {
+  background: #27272a;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] main,
+:root[data-theme="dark"] .page-shell,
+:root[data-theme="dark"] .community-page,
+:root[data-theme="dark"] .thread-page,
+:root[data-theme="dark"] .customer-portal,
+:root[data-theme="dark"] .dashboard-shell,
+:root[data-theme="dark"] .expert-page,
+:root[data-theme="dark"] .prebuilt-catalog,
+:root[data-theme="dark"] .login-page,
+:root[data-theme="dark"] .builder-page,
+:root[data-theme="dark"] .checkout-page,
+:root[data-theme="dark"] .order-complete,
+:root[data-theme="dark"] .product-page-dark,
+:root[data-theme="dark"] .prebuilt-detail,
+:root[data-theme="dark"] .diagnostic-page {
+  color: #ffffff;
+  background: #000000;
+}
+
+:root[data-theme="dark"] .product-card,
+:root[data-theme="dark"] .part-option,
+:root[data-theme="dark"] .code-modal,
+:root[data-theme="dark"] .service-booking,
+:root[data-theme="dark"] .metric-grid article,
+:root[data-theme="dark"] .sales-chart,
+:root[data-theme="dark"] .financial-panel,
+:root[data-theme="dark"] .recent-orders,
+:root[data-theme="dark"] .orders-panel,
+:root[data-theme="dark"] .inventory-table,
+:root[data-theme="dark"] .product-form-modal,
+:root[data-theme="dark"] .date-range-modal,
+:root[data-theme="dark"] .detail-line,
+:root[data-theme="dark"] .management-card,
+:root[data-theme="dark"] .banner-manager,
+:root[data-theme="dark"] .portal-tabs,
+:root[data-theme="dark"] .portal-tabs button,
+:root[data-theme="dark"] .active-order-card,
+:root[data-theme="dark"] .invoice-detail,
+:root[data-theme="dark"] .invoice-actions > button,
+:root[data-theme="dark"] .portal-form,
+:root[data-theme="dark"] .address-grid article,
+:root[data-theme="dark"] .payment-methods article,
+:root[data-theme="dark"] .warranty-layout form,
+:root[data-theme="dark"] .support-popover,
+:root[data-theme="dark"] .expert-message,
+:root[data-theme="dark"] .system-card,
+:root[data-theme="dark"] .consultation-hub,
+:root[data-theme="dark"] .shared-build,
+:root[data-theme="dark"] .discussion-card,
+:root[data-theme="dark"] .discussion-modal,
+:root[data-theme="dark"] .thread-aside,
+:root[data-theme="dark"] .reply-composer,
+:root[data-theme="dark"] .nested-comment,
+:root[data-theme="dark"] .forum-sidebar > div,
+:root[data-theme="dark"] .forum-empty,
+:root[data-theme="dark"] .account-menu,
+:root[data-theme="dark"] .cart-toast,
+:root[data-theme="dark"] .range-menu {
+  color: #ffffff;
+  background: #121212;
+  border-color: #27272a;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .password-field,
+:root[data-theme="dark"] .inventory-filter,
+:root[data-theme="dark"] .inventory-tools > div,
+:root[data-theme="dark"] .inventory-tools > button,
+:root[data-theme="dark"] .admin-form-grid input,
+:root[data-theme="dark"] .admin-form-grid select,
+:root[data-theme="dark"] .admin-form-grid textarea,
+:root[data-theme="dark"] .date-picker-field input,
+:root[data-theme="dark"] .checkout-fields input,
+:root[data-theme="dark"] .fulfillment-options > button,
+:root[data-theme="dark"] .pickup-panel,
+:root[data-theme="dark"] .pay-store-panel,
+:root[data-theme="dark"] .payment-tabs button,
+:root[data-theme="dark"] .login-card > label > input,
+:root[data-theme="dark"] .quantity button,
+:root[data-theme="dark"] .quantity b,
+:root[data-theme="dark"] .editor-shell,
+:root[data-theme="dark"] .discussion-upload,
+:root[data-theme="dark"] .stock-preview {
+  color: #ffffff;
+  background: #27272a;
+  border-color: #3f3f46;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: #a1a1aa;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] strong,
+:root[data-theme="dark"] .page-head h1,
+:root[data-theme="dark"] .detail-copy h1,
+:root[data-theme="dark"] .selection-head h2,
+:root[data-theme="dark"] .question-panel h2,
+:root[data-theme="dark"] .inventory-empty strong {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] p,
+:root[data-theme="dark"] small,
+:root[data-theme="dark"] .page-head p,
+:root[data-theme="dark"] .detail-lead,
+:root[data-theme="dark"] .discussion-body p,
+:root[data-theme="dark"] .thread-content p,
+:root[data-theme="dark"] .comment p,
+:root[data-theme="dark"] .empty-cart p,
+:root[data-theme="dark"] .inventory-empty span {
+  color: #a1a1aa;
+}
+
+:root[data-theme="dark"] .inventory-row,
+:root[data-theme="dark"] .order-row,
+:root[data-theme="dark"] .schedule-row,
+:root[data-theme="dark"] .cart-item,
+:root[data-theme="dark"] .history-order,
+:root[data-theme="dark"] .detail-line,
+:root[data-theme="dark"] .spec-table > div,
+:root[data-theme="dark"] .comment,
+:root[data-theme="dark"] .thread-header,
+:root[data-theme="dark"] .comments-section {
+  border-color: #27272a;
+}
+
+:root[data-theme="dark"] .order-row-button:hover,
+:root[data-theme="dark"] .inventory-row:not(.inventory-labels):hover,
+:root[data-theme="dark"] .row-actions button:hover,
+:root[data-theme="dark"] .panel-heading .range-menu button:hover,
+:root[data-theme="dark"] .icon-btn:hover,
+:root[data-theme="dark"] .category-card:hover,
+:root[data-theme="dark"] .service-link:hover,
+:root[data-theme="dark"] .discussion-card:hover,
+:root[data-theme="dark"] .editor-toolbar button:hover {
+  color: #ffffff;
+  background: #27272a;
+  border-color: #3f3f46;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .catalog-tabs button.active,
+:root[data-theme="dark"] .prebuilt-filters > div:first-child button.active,
+:root[data-theme="dark"] .order-tabs button.active,
+:root[data-theme="dark"] .consult-tabs button.active,
+:root[data-theme="dark"] .auth-tabs button.active,
+:root[data-theme="dark"] .portal-tabs button.active,
+:root[data-theme="dark"] .dashboard-nav nav button.active,
+:root[data-theme="dark"] .tier-list > button.active,
+:root[data-theme="dark"] .calendar-days button.active,
+:root[data-theme="dark"] .time-grid button.active,
+:root[data-theme="dark"] .consult-calendar button.active,
+:root[data-theme="dark"] .consult-times button.active,
+:root[data-theme="dark"] .symptom-grid button.active,
+:root[data-theme="dark"] .consult-type button.active,
+:root[data-theme="dark"] .fulfillment-options > button.active,
+:root[data-theme="dark"] .payment-tabs button.active,
+:root[data-theme="dark"] .forum-sidebar > button.active {
+  color: #ffffff;
+  background: #27272a;
+  border-color: #3f3f46;
+  box-shadow: inset 0 -2px #a1a1aa;
+}
+
+:root[data-theme="dark"] .feed-toolbar button.active,
+:root[data-theme="dark"] .builder-progress .active {
+  color: #ffffff;
+  border-color: #a1a1aa;
+  box-shadow: inset 0 -2px #a1a1aa;
+}
+
+:root[data-theme="dark"] .part-option:hover,
+:root[data-theme="dark"] .part-option.selected,
+:root[data-theme="dark"] .product-thumbnails button.active {
+  color: #ffffff;
+  background: #18181b;
+  border-color: #3f3f46;
+  box-shadow: inset 0 -2px #a1a1aa;
+}
+
+:root[data-theme="dark"] .btn-dark,
+:root[data-theme="dark"] .btn-light,
+:root[data-theme="dark"] .support-trigger,
+:root[data-theme="dark"] .discussion-engagement button.active,
+:root[data-theme="dark"] .thread-actions button.active {
+  color: #000000;
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .btn-dark:hover,
+:root[data-theme="dark"] .btn-light:hover,
+:root[data-theme="dark"] .support-trigger:hover {
+  color: #000000;
+  background: #e4e4e7;
+  border-color: #e4e4e7;
+}
+
+:root[data-theme="dark"] .btn-outline,
+:root[data-theme="dark"] .btn-outline:hover {
+  color: #ffffff;
+  background: transparent;
+  border-color: #3f3f46;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .stock-ok,
+:root[data-theme="dark"] .stock-low,
+:root[data-theme="dark"] .stock-out-admin,
+:root[data-theme="dark"] .order-status,
+:root[data-theme="dark"] .claim-status,
+:root[data-theme="dark"] .default-badge,
+:root[data-theme="dark"] .search-category {
+  color: #e4e4e7;
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+:root[data-theme="dark"] .cart-count,
+:root[data-theme="dark"] .active-order-image .mono,
+:root[data-theme="dark"] .tag,
+:root[data-theme="dark"] .result-icon,
+:root[data-theme="dark"] .expert-avatar,
+:root[data-theme="dark"] .discussion-author > span,
+:root[data-theme="dark"] .thread-author > span,
+:root[data-theme="dark"] .comment-avatar,
+:root[data-theme="dark"] .nested-comment > span {
+  color: #000000;
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+:root[data-theme="dark"] .cart-layer,
+:root[data-theme="dark"] .modal-backdrop,
+:root[data-theme="dark"] .admin-modal-layer,
+:root[data-theme="dark"] .detail-layer,
+:root[data-theme="dark"] .forum-modal-layer {
+  background: #000000d9;
+}
+
+/* Refined HUD spacing, forum search, and light-theme clarity */
+.site-header {
+  height: 88px;
+  padding: 0 4vw;
+  gap: 30px;
+}
+
+.desktop-nav {
+  gap: 26px;
+}
+
+.site-header .global-search {
+  width: clamp(300px, 26vw, 430px);
+  height: 46px;
+}
+
+.header-actions {
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.theme-toggle,
+.header-cart {
+  height: 46px;
+}
+
+.login-pill,
+.account-avatar {
+  min-height: 46px;
+}
+
+.hero {
+  height: calc(100vh - 88px);
+}
+
+.diagnostic-page,
+.diagnostic-result,
+.login-page,
+.dashboard-shell,
+.order-complete,
+.community-page,
+.thread-page {
+  min-height: calc(100vh - 88px);
+}
+
+.dashboard-nav {
+  top: 88px;
+  height: calc(100vh - 88px);
+}
+
+.detail-visual,
+.build-summary {
+  top: 107px;
+}
+
+.community-hero {
+  min-height: 470px;
+}
+
+.community-hero-copy {
+  width: min(820px, 100%);
+}
+
+.forum-search {
+  width: min(720px, 100%);
+  height: 58px;
+  margin-top: 30px;
+  padding: 0 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.forum-search > svg {
+  width: 19px;
+  flex: 0 0 auto;
+  color: #0066ff;
+}
+
+.forum-search input {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  color: #0f172a;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 12px;
+}
+
+.forum-search input::placeholder {
+  color: #64748b;
+}
+
+.forum-search > button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.forum-search > button svg {
+  width: 15px;
+}
+
+:root[data-theme="dark"] .forum-search {
+  color: #fafafa;
+  background: #18181b;
+  border-color: #3f3f46;
+}
+
+:root[data-theme="dark"] .forum-search > svg,
+:root[data-theme="dark"] .forum-search input {
+  color: #fafafa;
+}
+
+:root[data-theme="dark"] .forum-search input::placeholder {
+  color: #a1a1aa;
+}
+
+:root[data-theme="dark"] .forum-search > button {
+  color: #e4e4e7;
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+:root:not([data-theme="dark"]) {
+  --app-bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --ink: #0f172a;
+  --ink-muted: #64748b;
+  --border: #e2e8f0;
+  --paper: #f8fafc;
+  --line: #e2e8f0;
+  --muted: #64748b;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+:root:not([data-theme="dark"]) body,
+:root:not([data-theme="dark"]) main,
+:root:not([data-theme="dark"]) .page-shell,
+:root:not([data-theme="dark"]) .customer-portal,
+:root:not([data-theme="dark"]) .dashboard-shell,
+:root:not([data-theme="dark"]) .expert-page,
+:root:not([data-theme="dark"]) .prebuilt-catalog,
+:root:not([data-theme="dark"]) .diagnostic-page,
+:root:not([data-theme="dark"]) .community-page,
+:root:not([data-theme="dark"]) .thread-page {
+  color: #0f172a;
+  background: #f8fafc;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: none;
+}
+
+:root:not([data-theme="dark"]) .product-card,
+:root:not([data-theme="dark"]) .part-option,
+:root:not([data-theme="dark"]) .code-modal,
+:root:not([data-theme="dark"]) .service-booking,
+:root:not([data-theme="dark"]) .metric-grid article,
+:root:not([data-theme="dark"]) .sales-chart,
+:root:not([data-theme="dark"]) .financial-panel,
+:root:not([data-theme="dark"]) .recent-orders,
+:root:not([data-theme="dark"]) .orders-panel,
+:root:not([data-theme="dark"]) .inventory-table,
+:root:not([data-theme="dark"]) .product-form-modal,
+:root:not([data-theme="dark"]) .date-range-modal,
+:root:not([data-theme="dark"]) .management-card,
+:root:not([data-theme="dark"]) .banner-manager,
+:root:not([data-theme="dark"]) .portal-tabs,
+:root:not([data-theme="dark"]) .portal-tabs button,
+:root:not([data-theme="dark"]) .active-order-card,
+:root:not([data-theme="dark"]) .invoice-detail,
+:root:not([data-theme="dark"]) .invoice-actions > button,
+:root:not([data-theme="dark"]) .portal-form,
+:root:not([data-theme="dark"]) .address-grid article,
+:root:not([data-theme="dark"]) .payment-methods article,
+:root:not([data-theme="dark"]) .warranty-layout form,
+:root:not([data-theme="dark"]) .support-popover,
+:root:not([data-theme="dark"]) .system-card,
+:root:not([data-theme="dark"]) .consultation-hub,
+:root:not([data-theme="dark"]) .discussion-card,
+:root:not([data-theme="dark"]) .discussion-modal,
+:root:not([data-theme="dark"]) .thread-aside,
+:root:not([data-theme="dark"]) .reply-composer,
+:root:not([data-theme="dark"]) .nested-comment,
+:root:not([data-theme="dark"]) .forum-sidebar > div,
+:root:not([data-theme="dark"]) .forum-empty,
+:root:not([data-theme="dark"]) .account-menu {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: none;
+}
+
+:root:not([data-theme="dark"]) input,
+:root:not([data-theme="dark"]) select,
+:root:not([data-theme="dark"]) textarea,
+:root:not([data-theme="dark"]) .password-field,
+:root:not([data-theme="dark"]) .inventory-filter,
+:root:not([data-theme="dark"]) .inventory-tools > div,
+:root:not([data-theme="dark"]) .inventory-tools > button,
+:root:not([data-theme="dark"]) .admin-form-grid input,
+:root:not([data-theme="dark"]) .admin-form-grid select,
+:root:not([data-theme="dark"]) .admin-form-grid textarea,
+:root:not([data-theme="dark"]) .date-picker-field input,
+:root:not([data-theme="dark"]) .checkout-fields input,
+:root:not([data-theme="dark"]) .discussion-upload,
+:root:not([data-theme="dark"]) .editor-shell {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: none;
+}
+
+:root:not([data-theme="dark"]) h1,
+:root:not([data-theme="dark"]) h2,
+:root:not([data-theme="dark"]) h3,
+:root:not([data-theme="dark"]) h4,
+:root:not([data-theme="dark"]) strong {
+  color: #0f172a;
+  text-shadow: none;
+}
+
+:root:not([data-theme="dark"]) .community-hero h1,
+:root:not([data-theme="dark"]) .community-hero strong,
+:root:not([data-theme="dark"]) .site-header strong,
+:root:not([data-theme="dark"]) footer strong {
+  color: #ffffff;
+}
+
+:root:not([data-theme="dark"]) .inventory-row,
+:root:not([data-theme="dark"]) .order-row,
+:root:not([data-theme="dark"]) .schedule-row,
+:root:not([data-theme="dark"]) .cart-item,
+:root:not([data-theme="dark"]) .history-order,
+:root:not([data-theme="dark"]) .spec-table > div,
+:root:not([data-theme="dark"]) .comment,
+:root:not([data-theme="dark"]) .thread-header,
+:root:not([data-theme="dark"]) .comments-section {
+  border-color: #e2e8f0;
+}
+
+:root:not([data-theme="dark"]) .site-header .global-search,
+:root:not([data-theme="dark"]) .site-header .global-search:focus-within,
+:root:not([data-theme="dark"]) .search-results {
+  border-color: #cbd5e1;
+  box-shadow: none;
+}
+
+@media (max-width: 1240px) {
+  .site-header {
+    padding: 0 24px;
+    gap: 18px;
+  }
+
+  .desktop-nav {
+    gap: 16px;
+  }
+
+  .site-header .global-search {
+    width: min(27vw, 330px);
+  }
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    height: 72px;
+    padding: 0 20px;
+  }
+
+  .hero {
+    height: calc(100svh - 72px);
+  }
+
+  .community-hero {
+    min-height: 520px;
+  }
+
+  .forum-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .site-header {
+    padding: 0 14px;
+  }
+
+  .community-hero {
+    min-height: 560px;
+  }
+
+  .forum-search {
+    height: 54px;
+    padding: 0 13px;
+  }
 }

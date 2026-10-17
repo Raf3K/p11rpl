@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUp,
   BarChart3,
+  Bold,
+  Bookmark,
   Box,
   Calendar,
   Check,
@@ -13,12 +16,18 @@ import {
   DollarSign,
   Download,
   Edit3,
+  Flame,
   Cpu,
   Fan,
   Gauge,
   HardDrive,
+  Image,
+  Italic,
+  Link2,
+  List,
   Menu,
   MessageCircle,
+  Moon,
   MapPin,
   Megaphone,
   MemoryStick,
@@ -29,12 +38,14 @@ import {
   Plus,
   Receipt,
   Search,
+  Share2,
   ShieldCheck,
   Save,
   ShoppingBag,
   SlidersHorizontal,
   Star,
   Store,
+  Sun,
   Send,
   TrendingUp,
   Trash2,
@@ -72,6 +83,41 @@ const hardwareImages = {
   monitor: "https://images.unsplash.com/photo-1789922129938-f02af2785d19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBtb25pdG9yJTIwY29tcHV0ZXIlMjBoYXJkd2FyZSUyMHByb2R1Y3QlMjBkYXJrJTIwc3R1ZGlvfGVufDF8fHx8MTc5MTI2MjQzMXww&ixlib=rb-4.1.0&q=85&w=1200",
 };
 
+type CartItem = {
+  id: string;
+  name: string;
+  spec: string;
+  price: number;
+  image: string;
+  quantity: number;
+};
+
+const defaultCart: CartItem[] = [
+  { id: "rtx-4080-super", name: "GeForce RTX 4080 Super", spec: "16GB GDDR6X", price: 999, image: hardwareImages.gpu, quantity: 1 },
+  { id: "ryzen-9-9950x", name: "Ryzen 9 9950X", spec: "16-Core / AM5", price: 649, image: hardwareImages.cpu, quantity: 1 },
+];
+
+function readSavedCart(): CartItem[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem("simplifyCart") || "[]") as CartItem[] | number[];
+    if (saved.length > 0 && typeof saved[0] === "number") {
+      return defaultCart.map((item, index) => ({ ...item, quantity: Number(saved[index] || 0) })).filter((item) => item.quantity > 0);
+    }
+    return (saved as CartItem[]).filter((item) => item && item.quantity > 0);
+  } catch {
+    return [];
+  }
+}
+
+function addCartItem(item: Omit<CartItem, "quantity">) {
+  if (sessionStorage.getItem("simplifyRole") !== "customer") {
+    window.dispatchEvent(new Event("simplify-cart-login"));
+    return false;
+  }
+  window.dispatchEvent(new CustomEvent("simplify-cart-add", { detail: item }));
+  return true;
+}
+
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "light" | "dark" | "outline" | "ghost";
 };
@@ -83,18 +129,67 @@ function Button({ variant = "dark", className = "", ...props }: ButtonProps) {
 function Header() {
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [quantities, setQuantities] = useState([1, 1]);
-  const cartItems = [
-    { name: "GeForce RTX 4080 Super", spec: "16GB GDDR6X", price: 999, image: hardwareImages.gpu },
-    { name: "Ryzen 9 9950X", spec: "16-Core / AM5", price: 649, image: hardwareImages.cpu },
-  ];
-  const total = cartItems.reduce((sum, item, i) => sum + item.price * quantities[i], 0);
+  const [role, setRole] = useState(() => sessionStorage.getItem("simplifyRole"));
+  const [theme, setTheme] = useState<"light" | "dark">(() => (localStorage.getItem("simplifyTheme") === "dark" ? "dark" : "light"));
+  const [cart, setCart] = useState<CartItem[]>(() => sessionStorage.getItem("simplifyRole") === "customer" ? readSavedCart() : []);
+  const [cartToast, setCartToast] = useState(false);
+  const isCustomer = role === "customer";
+  const itemCount = isCustomer ? cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  useEffect(() => {
+    const syncAuth = () => {
+      const nextRole = sessionStorage.getItem("simplifyRole");
+      setRole(nextRole);
+      setCart(nextRole === "customer" ? readSavedCart() : []);
+    };
+    window.addEventListener("simplify-auth", syncAuth);
+    return () => window.removeEventListener("simplify-auth", syncAuth);
+  }, []);
+  useEffect(() => {
+    const addItem = (event: Event) => {
+      const item = (event as CustomEvent<Omit<CartItem, "quantity">>).detail;
+      setCart((current) => {
+        const existing = current.find((entry) => entry.id === item.id);
+        return existing
+          ? current.map((entry) => entry.id === item.id ? { ...entry, quantity: entry.quantity + 1 } : entry)
+          : [...current, { ...item, quantity: 1 }];
+      });
+      setCartToast(true);
+      window.setTimeout(() => setCartToast(false), 2600);
+    };
+    const requestLogin = () => setCartOpen(true);
+    window.addEventListener("simplify-cart-add", addItem);
+    window.addEventListener("simplify-cart-login", requestLogin);
+    return () => {
+      window.removeEventListener("simplify-cart-add", addItem);
+      window.removeEventListener("simplify-cart-login", requestLogin);
+    };
+  }, []);
+  useEffect(() => {
+    if (isCustomer) localStorage.setItem("simplifyCart", JSON.stringify(cart));
+  }, [cart, isCustomer]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("simplifyTheme", theme);
+  }, [theme]);
+  const updateQuantity = (id: string, change: number) => {
+    setCart((current) => current.flatMap((item) => {
+      if (item.id !== id) return [item];
+      const quantity = item.quantity + change;
+      return quantity > 0 ? [{ ...item, quantity }] : [];
+    }));
+  };
+  const removeItem = (id: string) => setCart((current) => current.filter((item) => item.id !== id));
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const taxes = subtotal * 0.0825;
+  const total = subtotal + taxes;
   const results = [
-    { name: "GeForce RTX 4080 Super", type: "GPU", price: "$999", stock: 14, image: hardwareImages.gpu },
-    { name: "Ryzen 9 9950X", type: "CPU", price: "$649", stock: 8, image: hardwareImages.cpu },
-    { name: "Apex X7", type: "Prebuilt PC", price: "$2,899", stock: 0, image: rigImage },
-  ].filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
+    { name: "GeForce RTX 4080 Super", type: "GPU", meta: "In Stock · 14 units", price: "$999", image: hardwareImages.gpu, to: "/product/rtx-4080" },
+    { name: "Ryzen 9 9950X", type: "CPU", meta: "In Stock · 8 units", price: "$649", image: hardwareImages.cpu, to: "/shop" },
+    { name: "Apex X7", type: "Prebuilt PC", meta: "Out of Stock", price: "$2,899", image: rigImage, to: "/prebuilt/apex-x7" },
+  ].filter((item) => `${item.name} ${item.type}`.toLowerCase().includes(search.toLowerCase()));
+  const accountName = sessionStorage.getItem("simplifyName") || "Alex Morgan";
   return (
     <>
       <header className="site-header">
@@ -103,19 +198,21 @@ function Header() {
           <span className="brand-name">simplify.pc</span>
         </Link>
         <nav className="desktop-nav" aria-label="Primary navigation">
-          <NavLink to="/shop">Components</NavLink>
-          <NavLink to="/prebuilt">Prebuilt</NavLink>
-          <NavLink to="/builder">PC Builder</NavLink>
-          <NavLink to="/expert">Advice</NavLink>
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/shop">Catalog</NavLink>
+          <NavLink to="/builder">B.Y.O</NavLink>
+          <NavLink to="/services">Services</NavLink>
+          <NavLink to="/community">Community</NavLink>
         </nav>
         <div className="global-search">
           <Search size={17} />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search parts, GPUs, or prebuilts..." aria-label="Search products" />
-          {search && <div className="search-results"><span className="mono">QUICK RESULTS</span>{results.length ? results.map((item) => <Link to={item.type === "Prebuilt PC" ? "/prebuilt/apex-x7" : "/product/rtx-4080"} key={item.name} onClick={() => setSearch("")}><img src={item.image} alt="" /><div><strong>{item.name}</strong><small><span className="search-category">{item.type}</span><span className={item.stock ? "stock-live" : "stock-out"}>{item.stock ? `In Stock · ${item.stock} units` : "Out of Stock"}</span></small></div><b>{item.price}</b></Link>) : <p>No hardware found. Try another search.</p>}<Link className="view-all-results" to="/shop" onClick={() => setSearch("")}>View all results <ArrowRight size={14} /></Link></div>}
+          {search && <div className="search-results"><span className="mono">QUICK RESULTS</span>{results.length ? results.map((item) => <Link to={item.to} key={item.name} onClick={() => setSearch("")}><img src={item.image} alt="" /><div><strong>{item.name}</strong><small><span className="search-category">{item.type}</span><span className={item.meta.startsWith("Out") ? "stock-out" : "stock-live"}>{item.meta}</span></small></div><b>{item.price}</b></Link>) : <p>No matches found. Try another search.</p>}<Link className="view-all-results" to="/shop" onClick={() => setSearch("")}>View all results <ArrowRight size={14} /></Link></div>}
         </div>
         <div className="header-actions">
-          <Link to="/login" className="icon-btn" aria-label="Log in or view account"><User size={19} /></Link>
-          <button className="icon-btn" aria-label="Shopping bag" onClick={() => setCartOpen(true)}><ShoppingBag size={19} /><span className="cart-count">{quantities.reduce((a, b) => a + b, 0)}</span></button>
+          <button className="theme-toggle" onClick={() => setTheme(theme === "light" ? "dark" : "light")} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}><Sun size={15} /><span><i /></span><Moon size={15} /></button>
+          <button className="header-cart" aria-label={`Shopping cart with ${itemCount} items`} onClick={() => setCartOpen(true)}><ShoppingBag size={18} /><span>Cart</span><b>{itemCount}</b></button>
+          {role ? <div className="account-control"><button className="account-avatar" onClick={() => setAccountOpen(!accountOpen)} aria-label="Open account menu">{accountName.split(" ").map((part) => part[0]).join("").slice(0, 2)}<ChevronDown size={13} /></button>{accountOpen && <div className="account-menu"><strong>{accountName}</strong><span>{role === "customer" ? "Customer account" : role === "super-admin" ? "Super Administrator" : "Administrator"}</span><Link to={role === "customer" ? "/account" : "/admin"} onClick={() => setAccountOpen(false)}><User />Profile</Link>{role === "customer" && <Link to="/account" onClick={() => setAccountOpen(false)}><Package />Orders</Link>}<Link to={role === "customer" ? "/account" : "/admin"} onClick={() => setAccountOpen(false)}><SlidersHorizontal />Settings</Link><button onClick={() => { sessionStorage.clear(); window.dispatchEvent(new Event("simplify-auth")); setAccountOpen(false); }}>Log out</button></div>}</div> : <Link to="/login" className="login-pill">Log In / Register</Link>}
           <button className="icon-btn mobile-menu" aria-label="Open menu" onClick={() => setOpen(true)}><Menu size={21} /></button>
         </div>
       </header>
@@ -123,20 +220,24 @@ function Header() {
         <div className="mobile-drawer">
           <div className="drawer-top"><span className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></span><button className="icon-btn" onClick={() => setOpen(false)}><X /></button></div>
           {[
-            ["/shop", "Components"],
+            ["/", "Home"],
+            ["/shop", "Catalog"],
             ["/prebuilt", "Prebuilt PCs"],
-            ["/builder", "PC Builder"],
+            ["/builder", "B.Y.O (Build Your Own)"],
             ["/services", "Services"],
+            ["/community", "Community"],
             ["/diagnose", "Diagnose"],
             ["/expert", "Expert Advice"],
           ].map(([to, label]) => <NavLink key={to} to={to} onClick={() => setOpen(false)}>{label}<ArrowRight /></NavLink>)}
+          <div className="mobile-drawer-tools"><button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon /> : <Sun />}Switch to {theme === "light" ? "dark" : "light"} theme</button><Link to={role === "customer" ? "/account" : role ? "/admin" : "/login"} onClick={() => setOpen(false)}><User />{role ? "My account" : "Log In / Register"}</Link></div>
         </div>
       )}
       {cartOpen && <div className="cart-layer" onMouseDown={() => setCartOpen(false)}><aside className="cart-drawer" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="cart-head"><div><span className="mono">YOUR CART</span><h2>{quantities.reduce((a, b) => a + b, 0)} ITEMS</h2></div><button onClick={() => setCartOpen(false)}><X /></button></div>
-        <div className="cart-items">{cartItems.map((item, index) => <div className="cart-item" key={item.name}><img src={item.image} alt={item.name} /><div><strong>{item.name}</strong><span>{item.spec}</span><div className="quantity"><button onClick={() => setQuantities(quantities.map((q, i) => i === index ? Math.max(1, q - 1) : q))}>−</button><b>{quantities[index]}</b><button onClick={() => setQuantities(quantities.map((q, i) => i === index ? q + 1 : q))}>+</button></div></div><b>${(item.price * quantities[index]).toLocaleString()}</b></div>)}</div>
-        <div className="cart-foot"><div><span>Subtotal</span><strong>${total.toLocaleString()}.00</strong></div><p>Taxes and shipping calculated at checkout.</p><Link to="/checkout" className="btn btn-dark" onClick={() => setCartOpen(false)}>Proceed to checkout <ArrowRight size={17} /></Link><button className="continue-shopping" onClick={() => setCartOpen(false)}>Continue shopping</button></div>
+        <div className="cart-head"><div><span className="mono">YOUR CART</span><h2>{itemCount > 0 ? `${itemCount} ITEMS` : "EMPTY CART"}</h2></div><button onClick={() => setCartOpen(false)}><X /></button></div>
+        {isCustomer && cart.length > 0 ? <><div className="cart-items">{cart.map((item) => <div className="cart-item" key={item.id}><img src={item.image} alt={item.name} /><div><strong>{item.name}</strong><span>{item.spec}</span><div className="quantity"><button onClick={() => updateQuantity(item.id, -1)} aria-label={`Reduce ${item.name} quantity`}>−</button><b>{item.quantity}</b><button onClick={() => updateQuantity(item.id, 1)} aria-label={`Increase ${item.name} quantity`}>+</button></div></div><div className="cart-item-end"><b>${(item.price * item.quantity).toLocaleString()}</b><button onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}><Trash2 />Remove</button></div></div>)}</div>
+        <div className="cart-foot"><div><span>Subtotal</span><strong>${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></div><div><span>Estimated taxes</span><b>${taxes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div><div className="cart-total"><span>Total</span><strong>${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div><Link to="/checkout" className="btn btn-dark" onClick={() => setCartOpen(false)}>Proceed to checkout <ArrowRight size={17} /></Link><button className="continue-shopping" onClick={() => setCartOpen(false)}>Continue shopping</button></div></> : <div className="empty-cart"><span><ShoppingBag /></span><h3>Your cart is empty</h3><p>{isCustomer ? "Browse components and systems to add your first item." : "Please log in or create an account to view your saved cart items."}</p>{isCustomer ? <Link to="/shop" className="btn btn-dark" onClick={() => setCartOpen(false)}>Shop components <ArrowRight /></Link> : <Link to="/login" className="btn btn-dark" onClick={() => setCartOpen(false)}>Log in <ArrowRight /></Link>}</div>}
       </aside></div>}
+      {cartToast && <div className="cart-toast"><span><Check /></span><div><strong>Item added to cart</strong><button onClick={() => { setCartOpen(true); setCartToast(false); }}>View Cart</button></div></div>}
     </>
   );
 }
@@ -145,7 +246,7 @@ function Footer() {
   return (
     <footer>
       <div><span className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></span><p>Engineered for what&apos;s next.</p></div>
-      <div className="footer-links"><Link to="/shop">Shop</Link><Link to="/builder">Build</Link><Link to="/services">Support</Link><span>© 2026 simplify.pc</span></div>
+      <div className="footer-links"><Link to="/shop">Shop</Link><Link to="/builder">B.Y.O</Link><Link to="/services">Support</Link><span>© 2026 simplify.pc</span></div>
     </footer>
   );
 }
@@ -201,7 +302,7 @@ function Home() {
           <h1>POWER,<br />PERFECTED.</h1>
           <p>Precision-selected components. Expert-built systems.<br className="desktop-only" /> Performance without compromise.</p>
           <div className="hero-actions">
-            <Link to="/builder" className="btn btn-light">Build your PC <ArrowRight size={18} /></Link>
+            <Link to="/builder" className="btn btn-light">Start your B.Y.O <ArrowRight size={18} /></Link>
             <Link to="/shop" className="btn btn-glass">Shop parts</Link>
           </div>
         </div>
@@ -311,7 +412,7 @@ function ProductCard({ product }: { product: typeof products[number] }) {
         <span className="mono product-brand">{product.brand}</span>
         <Link to={`/product/${product.id}`}><h3>{product.name}</h3></Link>
         <p>{product.spec}</p>
-        <div><strong>${product.price.toLocaleString()}</strong><Button aria-label={`Add ${product.name} to cart`} onClick={() => setAdded(true)}>{added ? <Check size={18} /> : <ShoppingBag size={17} />} {added ? "Added" : "Add"}</Button></div>
+        <div><strong>${product.price.toLocaleString()}</strong><Button aria-label={`Add ${product.name} to cart`} onClick={() => { if (addCartItem({ id: product.id, name: product.name, spec: product.spec, price: product.price, image: product.image })) setAdded(true); }}>{added ? <Check size={18} /> : <ShoppingBag size={17} />} {added ? "Add another" : "Add"}</Button></div>
       </div>
     </article>
   );
@@ -345,7 +446,7 @@ function ProductDetail() {
               <div><span>Boost clock</span><strong>2.55 GHZ</strong></div>
             </div>
             <div className="product-price-dark"><span className="mono">IN STOCK / SHIPS TODAY</span><strong>$999.00</strong><small>or 4 payments of $249.75</small></div>
-            <div className="product-ctas"><Button onClick={() => setAdded(true)}>{added ? <Check /> : <ShoppingBag />} {added ? "Added to cart" : "Add to cart"}</Button><Button variant="outline"><PlusIcon /> Add to build</Button></div>
+            <div className="product-ctas"><Button onClick={() => { if (addCartItem({ id: "rtx-4080-super", name: "GeForce RTX 4080 Super", spec: "16GB GDDR6X / Founders Edition", price: 999, image: gpuImages[activeImage] })) setAdded(true); }}>{added ? <Check /> : <ShoppingBag />} {added ? "Add another" : "Add to cart"}</Button><Button variant="outline"><PlusIcon /> Add to build</Button></div>
             <div className="compatibility-dark"><span className="compat-check"><Check /></span><div><strong>Compatible with your current build</strong><span>Power, clearance, and PCIe requirements verified</span></div><ChevronRight /></div>
             <div className="product-trust"><span><ShieldCheck />3-year warranty</span><span><PackageCheck />Free insured shipping</span></div>
           </div>
@@ -399,7 +500,7 @@ function PrebuiltCatalog() {
           <div className="system-copy">
             <span className="mono">SIMPLIFY.PC / {system.id.toUpperCase()}</span><h2>{system.name}</h2>
             <div className="system-specs"><span><b>CPU</b>{system.cpu}</span><span><b>GPU</b>{system.gpu}</span><span><b>RAM</b>{system.ram}</span><span><b>SSD</b>{system.storage}</span></div>
-            <div className="system-buy"><strong>${system.price.toLocaleString()}</strong><Link to={`/prebuilt/${system.id}`} className="btn btn-outline">View specs</Link><Button>Buy now</Button></div>
+            <div className="system-buy"><strong>${system.price.toLocaleString()}</strong><Link to={`/prebuilt/${system.id}`} className="btn btn-outline">View specs</Link><Button onClick={() => addCartItem({ id: system.id, name: system.name, spec: `${system.cpu} / ${system.gpu}`, price: system.price, image: system.image })}>Add to cart</Button></div>
           </div>
         </article>)}
       </div>
@@ -426,7 +527,7 @@ function PrebuiltDetail() {
         <div className="prebuilt-detail-image"><img src={rigImage} alt="Apex X7 prebuilt gaming PC" /><span className="outline-tag">ULTRA GAMING</span></div>
         <div className="prebuilt-detail-copy"><span className="eyebrow light"><span /> APEX SERIES / X7</span><h1>APEX X7</h1><p>Elite 4K performance, assembled around uncompromising thermals and silent operation.</p>
           <div className="benchmark-row"><div><strong>218</strong><span>FPS / 1440P</span></div><div><strong>142</strong><span>FPS / 4K</span></div><div><strong>62°C</strong><span>GPU LOAD</span></div></div>
-          <div className="prebuilt-price"><div><span>Starting at</span><strong>$2,899</strong></div><Button variant="light" onClick={() => setAdded(true)}>{added ? <Check /> : <ShoppingBag />} {added ? "Added to cart" : "Buy Apex X7"}</Button></div>
+          <div className="prebuilt-price"><div><span>Starting at</span><strong>$2,899</strong></div><Button variant="light" onClick={() => { if (addCartItem({ id: "apex-x7", name: "Apex X7", spec: "RTX 5080 / Core Ultra 7 / 32GB", price: 2899, image: rigImage })) setAdded(true); }}>{added ? <Check /> : <ShoppingBag />} {added ? "Add another" : "Add Apex X7"}</Button></div>
         </div>
       </div>
       <div className="prebuilt-breakdown">
@@ -467,7 +568,7 @@ function Builder() {
   const wattage = selected.reduce((sum, _, i) => sum + Number(buildParts[i][2].replace("W", "")), 0);
   return (
     <div className="builder-page">
-      <div className="builder-head"><div><span className="eyebrow light"><span /> CUSTOM CONFIGURATOR</span><h1>BUILD YOUR<br />MACHINE.</h1></div><p><span className="mono">STEP {String(step + 1).padStart(2, "0")} / 09</span>Select your {buildSteps[step].toLowerCase()}</p></div>
+      <div className="builder-head"><div><span className="eyebrow light"><span /> B.Y.O / BUILD YOUR OWN</span><h1>B.Y.O YOUR<br />MACHINE.</h1></div><p><span className="mono">STEP {String(step + 1).padStart(2, "0")} / 09</span>Select your {buildSteps[step].toLowerCase()}</p></div>
       <div className="builder-progress">{buildSteps.map((s, i) => <button key={s} className={i === step ? "active" : i < selected.length ? "done" : ""} onClick={() => i <= selected.length && setStep(i)}><span>{i < selected.length ? <Check size={13} /> : i + 1}</span><b>{s}</b></button>)}</div>
       <div className="builder-layout">
         <div className="builder-selection">
@@ -486,6 +587,7 @@ function Builder() {
           <div className="compat-box"><ShieldCheck /><div><strong>All parts compatible</strong><span>Power headroom: {Math.max(0, 1300 - wattage)}W</span></div></div>
           <div className="totals"><div><span>Estimated wattage</span><strong>{wattage}W</strong></div><div><span>Total</span><strong>${total.toLocaleString()}</strong></div></div>
           <Button disabled={selected.length < 9} onClick={() => setShowCode(true)}>Generate store code <ArrowRight size={17} /></Button>
+          <Button variant="outline" disabled={selected.length < 9} onClick={() => addCartItem({ id: `custom-build-${selected.join("-").length}`, name: "Custom PC Build", spec: `${selected.length} selected components / ${wattage}W`, price: total, image: rigImage })}><ShoppingBag size={17} /> Add build to cart</Button>
           <Button variant="outline" disabled={selected.length === 0} onClick={() => {
             sessionStorage.setItem("sharedBuild", JSON.stringify(selected.filter(Boolean)));
             navigate("/expert?shared=1");
@@ -585,21 +687,21 @@ function ExpertAdvice() {
     setMessage("");
   };
   const faqs = [
-    ["Can you check whether my parts are compatible?", "Yes. Share your configurator build and an expert will verify sockets, dimensions, cooling, power headroom, and BIOS requirements."],
+    ["Can you check whether my parts are compatible?", "Yes. Share your B.Y.O build and an expert will verify sockets, dimensions, cooling, power headroom, and BIOS requirements."],
     ["Is expert advice free?", "Live text advice and 15-minute video consultations are complimentary. Longer build-planning sessions can be booked in store."],
     ["Can I bring parts I already own?", "Absolutely. Tell us the exact models and we can plan a compatible upgrade around your current hardware."],
     ["How quickly will an expert respond?", "Live chat typically responds in under two minutes during store hours, Monday through Saturday."],
   ];
   return (
     <div className="expert-page">
-      <div className="expert-hero"><span className="eyebrow light"><span /> HUMAN SUPPORT / ZERO GUESSWORK</span><h1>ASK SOMEONE<br />WHO BUILDS.</h1><p>Real advice from working PC builders. No sales scripts. No bots.</p><div className="expert-status"><span /><b>4 experts online</b> · Average reply under 2 minutes</div></div>
+      <div className="expert-hero"><span className="eyebrow light"><span /> HUMAN SUPPORT / ZERO GUESSWORK</span><h1>ASK SOMEONE<br />WHO BUILDS.</h1><p>Real advice from working build experts. No sales scripts. No bots.</p><div className="expert-status"><span /><b>4 experts online</b> · Average reply under 2 minutes</div></div>
       <div className="consultation-hub">
         <div className="consult-tabs"><button className={mode === "chat" ? "active" : ""} onClick={() => setMode("chat")}><MessageCircle />Live text chat<span>Talk now</span></button><button className={mode === "book" ? "active" : ""} onClick={() => setMode("book")}><Calendar />Book a consultation<span>Video or in-store</span></button></div>
         {mode === "chat" ? <div className="full-chat">
-          <div className="chat-heading"><div className="expert-avatar">AK</div><div><strong>Alex Kim</strong><span>Senior PC Builder · Online</span></div><span className="status-dot" /></div>
+          <div className="chat-heading"><div className="expert-avatar">AK</div><div><strong>Alex Kim</strong><span>Senior Build Expert · Online</span></div><span className="status-dot" /></div>
           <div className="full-chat-messages">
             <div className="expert-message">Welcome to simplify.pc. Tell me what you&apos;re building and what you need the system to do.</div>
-            {sharedBuild.length > 0 && <div className="shared-build"><span className="mono">SHARED FROM PC BUILDER</span><strong>Your current build · {sharedBuild.length} parts</strong>{sharedBuild.map((part) => <small key={part}><Check size={12} />{part}</small>)}</div>}
+            {sharedBuild.length > 0 && <div className="shared-build"><span className="mono">SHARED FROM B.Y.O</span><strong>Your current build · {sharedBuild.length} parts</strong>{sharedBuild.map((part) => <small key={part}><Check size={12} />{part}</small>)}</div>}
             {messages.map((item, i) => <div className="user-message" key={`${item}-${i}`}>{item}</div>)}
           </div>
           <div className="full-chat-compose"><input value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Type your question..." /><button onClick={send}><Send /></button></div>
@@ -613,6 +715,123 @@ function ExpertAdvice() {
       <div className="faq-section"><div><span className="eyebrow"><span /> QUICK ANSWERS</span><h2>BEFORE YOU ASK.</h2></div><div className="faq-list">{faqs.map(([question, answer], i) => <button key={question} className={faq === i ? "open" : ""} onClick={() => setFaq(faq === i ? null : i)}><span>{String(i + 1).padStart(2, "0")}</span><div><strong>{question}</strong>{faq === i && <p>{answer}</p>}</div><b>{faq === i ? "−" : "+"}</b></button>)}</div></div>
     </div>
   );
+}
+
+type ForumCategory = "General Tech" | "Custom PC Builds" | "Hardware Troubleshooting" | "Performance Benchmarks" | "Battlestation Showoffs";
+type ForumPost = {
+  slug: string;
+  author: string;
+  initials: string;
+  role: string;
+  time: string;
+  category: ForumCategory;
+  title: string;
+  excerpt: string;
+  votes: number;
+  comments: number;
+  image?: string;
+};
+
+const forumPosts: ForumPost[] = [
+  { slug: "rtx-4090-cable-clearance", author: "Maya Chen", initials: "MC", role: "Verified Builder", time: "18 min ago", category: "Hardware Troubleshooting", title: "RTX 4090 power cable clearance issues in mid-tower cases", excerpt: "I tested four 12VHPWR cable routes in a compact airflow case. Here are the bend radius measurements, temperatures, and the cleanest solution.", votes: 284, comments: 48 },
+  { slug: "silent-1440p-build", author: "Jon Bell", initials: "JB", role: "Moderator", time: "1 hr ago", category: "Custom PC Builds", title: "A genuinely silent 1440p build under $1,600", excerpt: "After three fan curves and a case swap, this Ryzen 7 and RTX 4070 Super build stays below 31 dBA while gaming.", votes: 196, comments: 31, image: "https://images.unsplash.com/photo-1626218174358-7769486c4b79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXN0b20lMjBnYW1pbmclMjBQQyUyMGJhdHRsZXN0YXRpb24lMjBkZXNrJTIwUkdCJTIwc2V0dXBlbnwxfHx8fDE3OTIxMTA1MzN8MA&ixlib=rb-4.1.0&q=80&w=1080" },
+  { slug: "am5-memory-results", author: "Morgan Reed", initials: "MR", role: "Super Admin", time: "3 hrs ago", category: "Performance Benchmarks", title: "AM5 memory scaling: 6000 CL30 vs 6400 CL32 results", excerpt: "A controlled benchmark across twelve games and three productivity workloads, including one-percent lows and power draw.", votes: 143, comments: 22 },
+  { slug: "first-battlestation", author: "Niko Foster", initials: "NF", role: "Community Member", time: "Yesterday", category: "Battlestation Showoffs", title: "First battlestation after years on a laptop", excerpt: "Kept the desk minimal and focused the budget on a color-accurate display. Cable management took longer than the build.", votes: 89, comments: 17, image: "https://images.unsplash.com/photo-1696710257827-75e2e5954059?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxjdXN0b20lMjBnYW1pbmclMjBQQyUyMGJhdHRsZXN0YXRpb24lMjBkZXNrJTIwUkdCJTIwc2V0dXBlbnwxfHx8fDE3OTIxMTA1MzN8MA&ixlib=rb-4.1.0&q=80&w=1080" },
+];
+
+function CreateDiscussionModal({ close, publish }: { close: () => void; publish: (post: ForumPost) => void }) {
+  const [category, setCategory] = useState<ForumCategory>("General Tech");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [preview, setPreview] = useState("");
+  const insert = (before: string, after = before) => setBody((value) => `${value}${value ? "\n" : ""}${before}your text${after}`);
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!title.trim() || !body.trim()) return;
+    publish({ slug: `discussion-${Date.now()}`, author: sessionStorage.getItem("simplifyName") || "Alex Morgan", initials: "AM", role: "Community Member", time: "Just now", category, title: title.trim(), excerpt: body.trim(), votes: 0, comments: 0, image: preview || undefined });
+  };
+  const loadImage = (file?: File) => file && setPreview(URL.createObjectURL(file));
+  return <div className="forum-modal-layer" onMouseDown={close}><form className="discussion-modal" onSubmit={submit} onMouseDown={(event) => event.stopPropagation()}>
+    <div className="discussion-modal-head"><div><span className="mono">NEW DISCUSSION</span><h2>Share with the community</h2></div><button type="button" onClick={close} aria-label="Close discussion form"><X /></button></div>
+    <label>Category<select value={category} onChange={(event) => setCategory(event.target.value as ForumCategory)}>{["General Tech", "Custom PC Builds", "Hardware Troubleshooting", "Performance Benchmarks", "Battlestation Showoffs"].map((item) => <option key={item}>{item}</option>)}</select></label>
+    <label>Discussion title<input required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g., RTX 4090 power cable clearance issues in mid-tower cases" /></label>
+    <label>Post body<div className="editor-shell"><div className="editor-toolbar"><button type="button" onClick={() => insert("**")} aria-label="Bold"><Bold /></button><button type="button" onClick={() => insert("_")} aria-label="Italic"><Italic /></button><button type="button" onClick={() => insert("[", "](https://)")} aria-label="Add link"><Link2 /></button><button type="button" onClick={() => insert("`")} aria-label="Code snippet"><Box /></button><button type="button" onClick={() => insert("- ", "")} aria-label="Bullet list"><List /></button></div><textarea required value={body} onChange={(event) => setBody(event.target.value)} placeholder="Explain your question, what you have tried, and include relevant specifications..." /></div></label>
+    <label className="discussion-upload" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); loadImage(event.dataTransfer.files[0]); }}>{preview ? <img src={preview} alt="Attachment preview" /> : <><Image /><strong>Drop build photos or screenshots here</strong><span>PNG or JPG · up to 10 MB</span></>}<input type="file" accept="image/*" onChange={(event) => loadImage(event.target.files?.[0])} /></label>
+    <div className="discussion-actions"><button type="button" onClick={close}>Cancel</button><Button type="submit">Publish post <ArrowRight /></Button></div>
+  </form></div>;
+}
+
+function Community() {
+  const [category, setCategory] = useState("All Discussions");
+  const [sort, setSort] = useState<"Trending" | "Latest" | "Unanswered">("Trending");
+  const [forumQuery, setForumQuery] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [posts, setPosts] = useState(forumPosts);
+  const [voted, setVoted] = useState<string[]>([]);
+  const categories: [string, React.ElementType][] = [["All Discussions", MessageCircle], ["General Tech", Cpu], ["Custom PC Builds", Wrench], ["Hardware Troubleshooting", ShieldCheck], ["Performance Benchmarks", Gauge], ["Battlestation Showoffs", Monitor]];
+  const visible = posts
+    .filter((post) => category === "All Discussions" || post.category === category)
+    .filter((post) => sort !== "Unanswered" || post.comments === 0)
+    .filter((post) => `${post.title} ${post.excerpt} ${post.category} ${post.author}`.toLowerCase().includes(forumQuery.toLowerCase()))
+    .sort((a, b) => sort === "Latest" ? (a.time === "Just now" ? -1 : 1) : b.votes - a.votes);
+  const toggleVote = (slug: string) => {
+    setVoted((current) => current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]);
+    setPosts((current) => current.map((post) => post.slug === slug ? { ...post, votes: post.votes + (voted.includes(slug) ? -1 : 1) } : post));
+  };
+  return <div className="community-page">
+    <section className="community-hero"><div className="community-hero-copy"><span className="eyebrow light"><span /> BUILD TOGETHER / LEARN FASTER</span><h1>B.Y.O COMMUNITY <em>&amp;</em><br />TECH HUB</h1><p>Real builds, measured advice, and practical answers from people who know the hardware.</p><div className="forum-search"><Search /><input value={forumQuery} onChange={(event) => setForumQuery(event.target.value)} placeholder="Search discussions, PC build guides, or threads..." aria-label="Search community discussions" />{forumQuery && <button onClick={() => setForumQuery("")} aria-label="Clear community search"><X /></button>}</div></div><Button variant="light" onClick={() => setCreating(true)}><Plus />Create new discussion</Button></section>
+    <div className="community-layout">
+      <aside className="forum-sidebar"><span className="mono">CHANNELS</span>{categories.map(([item, Icon]) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}><Icon />{item}<ChevronRight /></button>)}<div><strong>Community standards</strong><p>Be specific, share sources, and help people build with confidence.</p><Link to="/services">Read guidelines <ArrowRight /></Link></div></aside>
+      <section className="forum-feed">
+        <div className="feed-toolbar"><div>{(["Trending", "Latest", "Unanswered"] as const).map((item) => <button key={item} className={sort === item ? "active" : ""} onClick={() => setSort(item)}>{item === "Trending" && <Flame />}{item}</button>)}</div><span className="mono">{visible.length.toString().padStart(2, "0")} DISCUSSIONS</span></div>
+        <div className="discussion-list">{visible.map((post) => <article className="discussion-card" key={post.slug}>
+          <div className="discussion-author"><span>{post.initials}</span><div><strong>{post.author}<b>{post.role}</b></strong><small>{post.time} · <em>{post.category}</em></small></div></div>
+          <Link to={`/community/${post.slug}`} className="discussion-body"><div><h2>{post.title}</h2><p>{post.excerpt}</p></div>{post.image && <img src={post.image} alt={`${post.title} preview`} />}</Link>
+          <div className="discussion-engagement"><button className={voted.includes(post.slug) ? "active" : ""} onClick={() => toggleVote(post.slug)}><ArrowUp />{post.votes}</button><Link to={`/community/${post.slug}`}><MessageCircle />{post.comments}</Link><button onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/community/${post.slug}`)}><Share2 />Share</button></div>
+        </article>)}</div>
+        {visible.length === 0 && <div className="forum-empty"><MessageCircle /><h2>{forumQuery ? "No matching discussions" : "No unanswered discussions"}</h2><p>{forumQuery ? "Try another search term or clear the current query." : "Everything has a response. Start a new question for the community."}</p>{forumQuery ? <Button onClick={() => setForumQuery("")}>Clear search</Button> : <Button onClick={() => setCreating(true)}>Create discussion</Button>}</div>}
+      </section>
+    </div>
+    {creating && <CreateDiscussionModal close={() => setCreating(false)} publish={(post) => { setPosts([post, ...posts]); setSort("Latest"); setCreating(false); }} />}
+  </div>;
+}
+
+function CommunityThread() {
+  const [votes, setVotes] = useState(284);
+  const [voted, setVoted] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [reply, setReply] = useState("");
+  const [replies, setReplies] = useState([
+    { author: "Alex Kim", initials: "AK", role: "Verified Builder", time: "12 min ago", body: "The safest target is 35 mm of clearance from the connector before the cable begins to bend. On compact cases I use a 90-degree native cable from the PSU manufacturer rather than an adapter.", nested: "Also check the side-panel pressure after a few heat cycles. A cable that looks clear when cold can shift slightly." },
+    { author: "Priya S.", initials: "PS", role: "Community Member", time: "6 min ago", body: "This measurement guide solved my North case fit. Moving the radiator to the top gained just enough room without changing the cable.", nested: "" },
+  ]);
+  const submitReply = () => {
+    if (!reply.trim()) return;
+    setReplies([...replies, { author: sessionStorage.getItem("simplifyName") || "Alex Morgan", initials: "AM", role: "Community Member", time: "Just now", body: reply.trim(), nested: "" }]);
+    setReply("");
+  };
+  return <div className="thread-page">
+    <div className="thread-shell">
+      <div className="thread-breadcrumb"><Link to="/community">Community</Link><ChevronRight /><span>Hardware Troubleshooting</span></div>
+      <header className="thread-header"><span className="thread-category">Hardware Troubleshooting</span><h1>RTX 4090 power cable clearance issues in mid-tower cases</h1><div className="thread-author"><span>MC</span><div><strong>Maya Chen <b>Verified Builder</b></strong><small>Published March 18, 2026 · 8 min read</small></div></div></header>
+      <div className="thread-grid">
+        <article className="thread-content">
+          <p className="thread-lead">I tested four 12VHPWR cable routes in a compact airflow case to find a safe bend radius without sacrificing side-panel clearance.</p>
+          <p>The common advice to “avoid bending near the connector” is correct, but it is not very useful without measurements. My test system uses an RTX 4090 Founders Edition in a 46-liter mid-tower with 170 mm of listed CPU cooler clearance.</p>
+          <img src={setupImage} alt="Desktop PC build used for cable clearance testing" />
+          <h2>What worked</h2><p>Routing below the card produced the cleanest path. The cable remained straight for 38 mm before its first bend and did not touch the glass panel. GPU temperatures were unchanged through a 30-minute load test.</p>
+          <pre><code>Minimum straight run: 35 mm{"\n"}Measured panel clearance: 11 mm{"\n"}Peak connector temperature: 42.6°C</code></pre>
+          <h2>Recommendation</h2><p>Use a native PSU cable whenever possible, confirm the connector is fully seated, and photograph the latch before closing the panel. Avoid forcing the side panel against the cable.</p>
+          <div className="thread-actions"><button className={voted ? "active" : ""} onClick={() => { setVoted(!voted); setVotes(votes + (voted ? -1 : 1)); }}><ArrowUp />{votes} Upvotes</button><button className={bookmarked ? "active" : ""} onClick={() => setBookmarked(!bookmarked)}><Bookmark />{bookmarked ? "Saved" : "Bookmark"}</button><button onClick={() => navigator.clipboard?.writeText(window.location.href)}><Share2 />Share</button></div>
+        </article>
+        <aside className="thread-aside"><span className="mono">THREAD SUMMARY</span><div><span>Replies</span><strong>{replies.length + 46}</strong></div><div><span>Views</span><strong>8.2K</strong></div><div><span>Last active</span><strong>Now</strong></div><Link to="/community">Explore more discussions <ArrowRight /></Link></aside>
+      </div>
+      <section className="comments-section"><div className="comments-heading"><div><span className="mono">COMMUNITY RESPONSES</span><h2>{replies.length + 46} replies</h2></div><span>Sorted by most helpful</span></div>
+        <div className="reply-composer"><div className="editor-toolbar"><button onClick={() => setReply(`${reply}**text**`)}><Bold /></button><button onClick={() => setReply(`${reply}\`code\``)}><Box /></button><button onClick={() => setReply(`${reply}[link](https://)`)}><Link2 /></button></div><textarea value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Add a constructive reply..." /><Button onClick={submitReply}>Post reply <Send /></Button></div>
+        <div className="comment-tree">{replies.map((comment, index) => <article className="comment" key={`${comment.author}-${index}`}><div className="comment-avatar">{comment.initials}</div><div><div className="comment-meta"><strong>{comment.author}<b>{comment.role}</b></strong><span>{comment.time}</span></div><p>{comment.body}</p><button><MessageCircle />Reply</button>{comment.nested && <div className="nested-comment"><span>TM</span><div><strong>Tom Mercer <b>Moderator</b></strong><p>{comment.nested}</p><button><MessageCircle />Reply</button></div></div>}</div></article>)}</div>
+      </section>
+    </div>
+  </div>;
 }
 
 function Login() {
@@ -638,6 +857,8 @@ function Login() {
     const role = normalized.includes("super") ? "super-admin" : normalized.includes("admin") ? "admin" : "customer";
     sessionStorage.setItem("simplifyRole", role);
     sessionStorage.setItem("simplifyName", mode === "register" ? fullName : role === "customer" ? "Alex Morgan" : role === "super-admin" ? "Morgan Reed" : "Alex Kim");
+    if (role === "customer" && !localStorage.getItem("simplifyCart")) localStorage.setItem("simplifyCart", JSON.stringify(defaultCart));
+    window.dispatchEvent(new Event("simplify-auth"));
     navigate(role === "customer" ? "/account" : "/admin");
   };
   return (
@@ -662,7 +883,7 @@ function Login() {
 }
 
 type AdminView = "overview" | "inventory" | "orders" | "consultations" | "banners";
-type InventoryItem = { name: string; category: string; price: number; stock: number; image: string; discount: number; status: "In stock" | "Low stock" | "Out of stock"; description: string };
+type InventoryItem = { name: string; category: string; price: number; stock: number; image: string; discount: number; status: "In Stock" | "Low Stock" | "Out of Stock"; description: string };
 type AdminOrder = { id: string; customer: string; email: string; type: "pickup" | "delivery"; code: string; total: string; status: string; payment: string; timestamp: string; items: string[] };
 
 function AdminDashboard() {
@@ -674,13 +895,16 @@ function AdminDashboard() {
   const [dateRange, setDateRange] = useState("Last 30 Days");
   const [customRange, setCustomRange] = useState(false);
   const [inventoryQuery, setInventoryQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [stockFilter, setStockFilter] = useState("All Stock");
   const [productPreview, setProductPreview] = useState("");
+  const [stockDraft, setStockDraft] = useState(0);
   const [inventory, setInventory] = useState<InventoryItem[]>([
-    { name: "GeForce RTX 4080 Super", category: "GPU", price: 999, stock: 24, image: hardwareImages.gpu, discount: 15, status: "In stock", description: "16GB GDDR6X performance graphics card" },
-    { name: "Ryzen 9 9950X", category: "CPU", price: 649, stock: 18, image: hardwareImages.cpu, discount: 0, status: "In stock", description: "16-core AM5 desktop processor" },
-    { name: "ROG Crosshair X870E", category: "Motherboard", price: 699, stock: 7, image: hardwareImages.board, discount: 0, status: "Low stock", description: "Premium X870E ATX motherboard" },
-    { name: "Trident Z5 Neo 64GB", category: "RAM", price: 219, stock: 42, image: hardwareImages.memory, discount: 10, status: "In stock", description: "DDR5-6400 dual-channel memory" },
-    { name: "Kraken Elite 360", category: "CPU Cooler", price: 279, stock: 0, image: hardwareImages.cooling, discount: 0, status: "Out of stock", description: "360mm liquid CPU cooler" },
+    { name: "GeForce RTX 4080 Super", category: "GPU", price: 999, stock: 24, image: hardwareImages.gpu, discount: 15, status: "In Stock", description: "16GB GDDR6X performance graphics card" },
+    { name: "Ryzen 9 9950X", category: "CPU", price: 649, stock: 18, image: hardwareImages.cpu, discount: 0, status: "In Stock", description: "16-core AM5 desktop processor" },
+    { name: "ROG Crosshair X870E", category: "Motherboard", price: 699, stock: 7, image: hardwareImages.board, discount: 0, status: "Low Stock", description: "Premium X870E ATX motherboard" },
+    { name: "Trident Z5 Neo 64GB", category: "RAM", price: 219, stock: 42, image: hardwareImages.memory, discount: 10, status: "In Stock", description: "DDR5-6400 dual-channel memory" },
+    { name: "Kraken Elite 360", category: "CPU Cooler", price: 279, stock: 0, image: hardwareImages.cooling, discount: 0, status: "Out of Stock", description: "360mm liquid CPU cooler" },
   ]);
   const role = sessionStorage.getItem("simplifyRole") === "admin" ? "admin" : "super-admin";
   const isSuper = role === "super-admin";
@@ -691,7 +915,11 @@ function AdminDashboard() {
     { id: "SPC-24078", customer: "Taylor Chen", email: "taylor@example.com", type: "delivery", code: "UPS-4839172", total: "$1,299.00", status: "Processing", payment: "Paid · Mastercard •1881", timestamp: "Mar 14, 2026 · 9:31 AM", items: ["GeForce RTX 5080"] },
   ];
   const visibleOrders = orderType === "all" ? orders : orders.filter((order) => order.type === orderType);
-  const filteredInventory = inventory.filter((item) => item.name.toLowerCase().includes(inventoryQuery.toLowerCase()));
+  const filteredInventory = inventory.filter((item) =>
+    item.name.toLowerCase().includes(inventoryQuery.toLowerCase()) &&
+    (categoryFilter === "All Categories" || item.category === categoryFilter) &&
+    (stockFilter === "All Stock" || item.status === stockFilter)
+  );
   const saveProduct = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -699,7 +927,7 @@ function AdminDashboard() {
     const item: InventoryItem = {
       name: String(data.get("name")), category: String(data.get("category")), price: Number(data.get("price")), stock,
       image: productPreview || (editing !== "new" && editing ? editing.image : hardwareImages.gpu), discount: Number(data.get("discount")),
-      status: String(data.get("status")) as InventoryItem["status"], description: String(data.get("description")),
+      status: stock === 0 ? "Out of Stock" : "In Stock", description: String(data.get("description")),
     };
     setInventory(editing === "new" ? [...inventory, item] : inventory.map((product) => product.name === editing?.name ? item : product));
     setEditing(null);
@@ -711,10 +939,10 @@ function AdminDashboard() {
       <aside className="dashboard-nav">
         <div><span className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></span><small className="mono">ADMIN CONTROL</small></div>
         <nav>{([["overview", BarChart3, "Overview"], ["inventory", Package, "Inventory"], ["orders", Receipt, "Orders"], ["consultations", Users, "Consultations"], ["banners", Megaphone, "Banners"]] as const).map(([id, Icon, label]) => <button className={view === id ? "active" : ""} onClick={() => setView(id)} key={id}><Icon />{label}</button>)}</nav>
-        <div className="admin-user"><span>{isSuper ? "MR" : "AK"}</span><div><strong>{isSuper ? "Morgan Reed" : "Alex Kim"}</strong><small>{isSuper ? "Super Administrator" : "Standard Administrator"}</small></div><Link to="/login"><ArrowLeft /></Link></div>
+        <div className="admin-user"><span>{isSuper ? "MR" : "AK"}</span><div><strong>{isSuper ? "Morgan Reed" : "Alex Kim"}</strong><small>{isSuper ? "Super Administrator" : "Standard Administrator"}</small></div><Link to="/login" onClick={() => { sessionStorage.removeItem("simplifyRole"); sessionStorage.removeItem("simplifyName"); window.dispatchEvent(new Event("simplify-auth")); }}><ArrowLeft /></Link></div>
       </aside>
       <div className="dashboard-main">
-        <header className="dashboard-header"><div><span className="mono">{isSuper ? "SUPER ADMIN" : "ADMIN"} / {view.toUpperCase()}</span><h1>{titles[view]}</h1></div><div><span className="dashboard-live"><i />Live store</span>{view === "inventory" && <Button onClick={() => { setProductPreview(""); setEditing("new"); }}><Plus />Add product</Button>}<div className="admin-avatar">{isSuper ? "MR" : "AK"}</div></div></header>
+        <header className="dashboard-header"><div><span className="mono">{isSuper ? "SUPER ADMIN" : "ADMIN"} / {view.toUpperCase()}</span><h1>{titles[view]}</h1></div><div><span className="dashboard-live"><i />Live store</span>{view === "inventory" && <Button onClick={() => { setProductPreview(""); setStockDraft(0); setEditing("new"); }}><Plus />Add product</Button>}<div className="admin-avatar">{isSuper ? "MR" : "AK"}</div></div></header>
         {view === "overview" && <div className="dashboard-content">
           <div className="metric-grid">
             {isSuper && <article><span><DollarSign />Total revenue</span><strong>$284,960</strong><small><TrendingUp /> +18.4% vs last month</small></article>}
@@ -728,12 +956,30 @@ function AdminDashboard() {
           </div>
           <div className="recent-orders"><div className="panel-heading"><div><span className="mono">LIVE TRANSACTIONS / {orders.length} TOTAL</span><h2>Orders & transactions</h2></div><button onClick={() => setView("orders")}>View all <ArrowRight /></button></div><AdminOrderTable orders={orders} onSelect={setSelectedOrder} /></div>
         </div>}
-        {view === "inventory" && <div className="dashboard-content"><div className="inventory-tools"><div><Search /><input value={inventoryQuery} onChange={(event) => setInventoryQuery(event.target.value)} placeholder="Search inventory..." /></div><button>All categories <ChevronDown /></button><button>Stock status <ChevronDown /></button></div><div className="inventory-table"><div className="inventory-row inventory-labels"><span>Product</span><span>Category</span><span>Price</span><span>Stock</span><span>Status</span><span /></div>{filteredInventory.map((item) => <div className="inventory-row" key={item.name}><div><img src={item.image} alt={item.name} /><span><strong>{item.name}</strong>{item.discount > 0 && <small>{item.discount}% OFF</small>}</span></div><span>{item.category}</span><b>{item.discount ? <><s>${item.price}</s> ${(item.price * (1 - item.discount / 100)).toFixed(0)}</> : `$${item.price}`}</b><span>{item.stock}</span><span className={item.status === "In stock" ? "stock-ok" : "stock-low"}>{item.status}</span><div className="row-actions"><button onClick={() => setEditing(item)} aria-label={`Edit ${item.name}`}><Edit3 /></button><button onClick={() => window.confirm(`Archive ${item.name}?`) && setInventory(inventory.filter((product) => product.name !== item.name))} aria-label={`Archive ${item.name}`}><Trash2 /></button></div></div>)}</div></div>}
+        {view === "inventory" && <div className="dashboard-content"><div className="inventory-tools"><div><Search /><input value={inventoryQuery} onChange={(event) => setInventoryQuery(event.target.value)} placeholder="Search inventory..." /></div><label className="inventory-filter"><span>Category</span><select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}><option>All Categories</option>{["GPU", "CPU", "Motherboard", "RAM", "CPU Cooler", "Case Fan", "Casing", "PSU", "Monitor", "Prebuilt PC"].map((category) => <option key={category}>{category}</option>)}</select><ChevronDown /></label><label className="inventory-filter"><span>Status</span><select value={stockFilter} onChange={(event) => setStockFilter(event.target.value)}><option>All Stock</option><option>In Stock</option><option>Low Stock</option><option>Out of Stock</option></select><ChevronDown /></label></div><div className="inventory-table"><div className="inventory-row inventory-labels"><span>Product</span><span>Category</span><span>Price</span><span>Available quantity</span><span>Status</span><span /></div>{filteredInventory.map((item) => <div className="inventory-row" key={item.name}><div><img src={item.image} alt={item.name} /><span><strong>{item.name}</strong>{item.discount > 0 && <small>{item.discount}% OFF</small>}</span></div><span>{item.category}</span><b>{item.discount ? <><s>${item.price}</s> ${(item.price * (1 - item.discount / 100)).toFixed(0)}</> : `$${item.price}`}</b><span>{item.stock} available</span><span className={item.status === "In Stock" ? "stock-ok" : item.status === "Out of Stock" ? "stock-out-admin" : "stock-low"}>{item.status}</span><div className="row-actions"><button onClick={() => { setStockDraft(item.stock); setEditing(item); }} aria-label={`Edit ${item.name}`}><Edit3 /></button><button onClick={() => window.confirm(`Archive ${item.name}?`) && setInventory(inventory.filter((product) => product.name !== item.name))} aria-label={`Archive ${item.name}`}><Trash2 /></button></div></div>)}</div>{filteredInventory.length === 0 && <div className="inventory-empty"><Package /><strong>No matching products</strong><span>Adjust the search or filter selections.</span></div>}</div>}
         {view === "orders" && <div className="dashboard-content"><div className="order-tabs"><button className={orderType === "all" ? "active" : ""} onClick={() => setOrderType("all")}>All transactions <span>{orders.length}</span></button><button className={orderType === "pickup" ? "active" : ""} onClick={() => setOrderType("pickup")}>Store pickup <span>{orders.filter((order) => order.type === "pickup").length}</span></button><button className={orderType === "delivery" ? "active" : ""} onClick={() => setOrderType("delivery")}>Delivery <span>{orders.filter((order) => order.type === "delivery").length}</span></button></div><div className="orders-panel"><div className="panel-heading"><div><span className="mono">FULFILLMENT QUEUE</span><h2>{orderType === "all" ? "All active orders" : orderType === "pickup" ? "Store pickup orders" : "Delivery orders"}</h2></div><button>Export <Upload /></button></div><AdminOrderTable orders={visibleOrders} onSelect={setSelectedOrder} /></div></div>}
         {view === "consultations" && <ConsultationAdmin />}
         {view === "banners" && <BannerAdmin />}
       </div>
-      {editing && <div className="admin-modal-layer" onMouseDown={() => setEditing(null)}><form className="product-form-modal product-editor" onMouseDown={(event) => event.stopPropagation()} onSubmit={saveProduct}><div><span className="mono">{editing === "new" ? "NEW INVENTORY ITEM" : "EDIT PRODUCT"}</span><button type="button" onClick={() => setEditing(null)}><X /></button></div><h2>{editing === "new" ? "Add product" : "Edit details"}</h2><label className={`image-upload ${productPreview ? "has-preview" : ""}`}>{productPreview ? <img src={productPreview} alt="New product preview" /> : <><Upload /><strong>Drag and drop or upload images</strong><span>PNG or JPG · Preview generated instantly</span></>}<input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setProductPreview(URL.createObjectURL(file)); }} /></label><div className="admin-form-grid"><label>Product name<input name="name" required defaultValue={editing === "new" ? "" : editing.name} /></label><label>Category<select name="category" defaultValue={editing === "new" ? "CPU" : editing.category}>{["CPU", "GPU", "Motherboard", "RAM", "CPU Cooler", "Case Fan", "Casing", "PSU", "Monitor", "Prebuilt PC"].map((category) => <option key={category}>{category}</option>)}</select></label><label>Base price<input name="price" required type="number" min="0" defaultValue={editing === "new" ? "" : editing.price} /></label><label>Stock quantity<input name="stock" required type="number" min="0" defaultValue={editing === "new" ? "" : editing.stock} /></label><label>Discount %<input name="discount" type="number" min="0" max="90" defaultValue={editing === "new" ? 0 : editing.discount} /></label><label>Stock status<select name="status" defaultValue={editing === "new" ? "In stock" : editing.status}><option>In stock</option><option>Low stock</option><option>Out of stock</option></select></label><label className="wide">Description<textarea name="description" required defaultValue={editing === "new" ? "" : editing.description} /></label><label>Spec key<input placeholder="e.g. Memory" /></label><label>Spec value<input placeholder="e.g. 16GB GDDR6X" /></label><label>Spec key<input placeholder="e.g. Boost clock" /></label><label>Spec value<input placeholder="e.g. 2.55 GHz" /></label></div><Button type="submit"><Save />{editing === "new" ? "Create product" : "Save changes"}</Button></form></div>}
+      {editing && <div className="admin-modal-layer" onMouseDown={() => setEditing(null)}>
+        <form className="product-form-modal product-editor" onMouseDown={(event) => event.stopPropagation()} onSubmit={saveProduct}>
+          <div><span className="mono">{editing === "new" ? "NEW INVENTORY ITEM" : "EDIT PRODUCT"}</span><button type="button" onClick={() => setEditing(null)}><X /></button></div>
+          <h2>{editing === "new" ? "Add product" : "Edit details"}</h2>
+          <label className={`image-upload ${productPreview ? "has-preview" : ""}`}>{productPreview ? <img src={productPreview} alt="New product preview" /> : <><Upload /><strong>Drag and drop or upload images</strong><span>PNG or JPG · Preview generated instantly</span></>}<input type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) setProductPreview(URL.createObjectURL(file)); }} /></label>
+          <div className="admin-form-grid">
+            <label>Product name<input name="name" required defaultValue={editing === "new" ? "" : editing.name} /></label>
+            <label>Category<select name="category" defaultValue={editing === "new" ? "CPU" : editing.category}>{["CPU", "GPU", "Motherboard", "RAM", "CPU Cooler", "Case Fan", "Casing", "PSU", "Monitor", "Prebuilt PC"].map((category) => <option key={category}>{category}</option>)}</select></label>
+            <label>Base price<input name="price" required type="number" min="0" defaultValue={editing === "new" ? "" : editing.price} /></label>
+            <label>Stock quantity<input name="stock" required type="number" min="0" value={stockDraft} onChange={(event) => setStockDraft(Math.max(0, Number(event.target.value)))} /></label>
+            <label>Discount %<input name="discount" type="number" min="0" max="90" defaultValue={editing === "new" ? 0 : editing.discount} /></label>
+            <div className="stock-preview"><span>Automatic stock status</span><strong className={stockDraft === 0 ? "stock-out-admin" : "stock-ok"}>{stockDraft === 0 ? "Out of Stock" : "In Stock"}</strong><small>{stockDraft} units available</small></div>
+            <label className="wide">Description<textarea name="description" required defaultValue={editing === "new" ? "" : editing.description} /></label>
+            <label>Spec key<input placeholder="e.g. Memory" /></label><label>Spec value<input placeholder="e.g. 16GB GDDR6X" /></label>
+            <label>Spec key<input placeholder="e.g. Boost clock" /></label><label>Spec value<input placeholder="e.g. 2.55 GHz" /></label>
+          </div>
+          <Button type="submit"><Save />{editing === "new" ? "Create product" : "Save changes"}</Button>
+        </form>
+      </div>}
       {selectedOrder && <OrderDetails order={selectedOrder} close={() => setSelectedOrder(null)} />}
       {customRange && <div className="admin-modal-layer" onMouseDown={() => setCustomRange(false)}><div className="date-range-modal" onMouseDown={(event) => event.stopPropagation()}><div><span className="mono">CUSTOM DATE RANGE</span><button onClick={() => setCustomRange(false)}><X /></button></div><h2>Choose reporting period</h2><label>Start date<input type="date" defaultValue="2026-03-01" /></label><label>End date<input type="date" defaultValue="2026-03-30" /></label><Button onClick={() => { setDateRange("Mar 1 – Mar 30"); setCustomRange(false); }}>Apply date range</Button></div></div>}
     </div>
@@ -782,7 +1028,7 @@ function CustomerPortal() {
   const orderDetail: AdminOrder = { id: "SPC-24081", customer: customerName, email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "Mar 16, 2026 · 10:42 AM", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] };
   return (
     <div className="customer-portal">
-      <div className="portal-head"><div><span className="eyebrow light"><span /> CUSTOMER PROFILE</span><h1>WELCOME BACK,<br />{customerName.split(" ")[0].toUpperCase()}.</h1></div><div className="portal-user"><span>{customerName.split(" ").map((part) => part[0]).join("").slice(0, 2)}</span><div><strong>{customerName}</strong><small>alex@example.com</small></div><Link to="/login">Log out</Link></div></div>
+      <div className="portal-head"><div><span className="eyebrow light"><span /> CUSTOMER PROFILE</span><h1>WELCOME BACK,<br />{customerName.split(" ")[0].toUpperCase()}.</h1></div><div className="portal-user"><span>{customerName.split(" ").map((part) => part[0]).join("").slice(0, 2)}</span><div><strong>{customerName}</strong><small>alex@example.com</small></div><Link to="/login" onClick={() => { sessionStorage.removeItem("simplifyRole"); sessionStorage.removeItem("simplifyName"); window.dispatchEvent(new Event("simplify-auth")); }}>Log out</Link></div></div>
       <nav className="portal-tabs">{([["orders", Package, "Orders & services"], ["history", Receipt, "Transactions"], ["profile", User, "Personal info"], ["addresses", MapPin, "Addresses"], ["payments", CreditCard, "Payments"], ["warranty", ShieldCheck, "Warranty"]] as const).map(([id, Icon, label]) => <button className={tab === id ? "active" : ""} onClick={() => setTab(id)} key={id}><Icon />{label}</button>)}</nav>
       <div className="portal-content">
         {tab === "orders" && <section><div className="portal-section-head"><div><span className="mono">03 ACTIVE</span><h2>Current orders & services</h2></div><Link to="/shop">Continue shopping <ArrowRight /></Link></div>
@@ -866,6 +1112,8 @@ export const router = createBrowserRouter([
       { path: "services", Component: Services },
       { path: "diagnose", Component: Diagnose },
       { path: "expert", Component: ExpertAdvice },
+      { path: "community", Component: Community },
+      { path: "community/:slug", Component: CommunityThread },
       { path: "checkout", Component: Checkout },
       { path: "login", Component: Login },
       { path: "admin", Component: AdminDashboard },
