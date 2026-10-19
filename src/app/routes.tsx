@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { stockStatusFor, type StockStatus } from "./schema";
 import {
   ArrowLeft,
   ArrowRight,
@@ -118,6 +119,15 @@ function addCartItem(item: Omit<CartItem, "quantity">) {
   return true;
 }
 
+function formatDate(value: string) {
+  if (!value) return "Select date";
+  return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
+}
+
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "light" | "dark" | "outline" | "ghost";
 };
@@ -199,7 +209,7 @@ function Header() {
         </Link>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <NavLink to="/">Home</NavLink>
-          <NavLink to="/shop">Catalog</NavLink>
+          <NavLink to="/shop">Product</NavLink>
           <NavLink to="/builder">B.Y.O</NavLink>
           <NavLink to="/services">Services</NavLink>
           <NavLink to="/community">Community</NavLink>
@@ -221,7 +231,7 @@ function Header() {
           <div className="drawer-top"><span className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></span><button className="icon-btn" onClick={() => setOpen(false)}><X /></button></div>
           {[
             ["/", "Home"],
-            ["/shop", "Catalog"],
+            ["/shop", "Product"],
             ["/prebuilt", "Prebuilt PCs"],
             ["/builder", "B.Y.O (Build Your Own)"],
             ["/services", "Services"],
@@ -380,7 +390,7 @@ function Shop() {
   const filtered = category === "All" ? products : products.filter((p) => p.type === category);
   return (
     <div className="page-shell">
-      <div className="page-head"><span className="eyebrow"><span /> COMPONENTS</span><h1>BUILD WITHOUT<br />LIMITS.</h1><p>Curated hardware. Verified compatibility. No guesswork.</p></div>
+      <div className="page-head"><span className="eyebrow"><span /> PRODUCT CATALOG</span><h1>BUILD WITHOUT<br />LIMITS.</h1><p>Curated hardware. Verified compatibility. No guesswork.</p></div>
       <div className="catalog-toolbar">
         <div className="catalog-tabs">{["All", "CPU", "GPU", "Motherboard", "Memory", "Cooling", "Storage"].map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>{item}</button>)}</div>
         <button className="sort-btn" onClick={() => setSort(sort === "Featured" ? "Price: Low to High" : "Featured")}><SlidersHorizontal size={16} /> {sort}</button>
@@ -429,7 +439,7 @@ function ProductDetail() {
   return (
     <div className="product-page-dark">
       <div className="product-page-inner">
-        <div className="product-crumbs"><Link to="/shop">Components</Link><ChevronRight size={13} /><Link to="/shop">Graphics Cards</Link><ChevronRight size={13} /><span>RTX 4080 Super</span></div>
+        <div className="product-crumbs"><Link to="/shop">Product</Link><ChevronRight size={13} /><Link to="/shop">Graphics Cards</Link><ChevronRight size={13} /><span>RTX 4080 Super</span></div>
         <div className="product-showcase">
           <div className="product-gallery">
             <div className="product-main-image"><img src={gpuImages[activeImage]} alt="NVIDIA GeForce RTX 4080 graphics card" /><span className="image-label mono">GEFORCE RTX / FOUNDERS EDITION</span><span className="image-count mono">{String(activeImage + 1).padStart(2, "0")} / 03</span></div>
@@ -616,6 +626,9 @@ function CodeModal({ close, total }: { close: () => void; total: number }) {
 function Services() {
   const [tier, setTier] = useState(1);
   const [booked, setBooked] = useState(false);
+  const [sessionType, setSessionType] = useState<"store" | "video">("store");
+  const [selectedDate, setSelectedDate] = useState("2026-03-18");
+  const [selectedTime, setSelectedTime] = useState("02:00 PM");
   const tiers = [
     ["Deep Dust Clean", "$59", "45 min", "Complete internal and external cleaning"],
     ["System Tune-Up", "$119", "90 min", "Cleaning, thermal service and optimization"],
@@ -627,14 +640,17 @@ function Services() {
       <div className="service-booking">
         <div className="tier-list">
           <span className="mono">01 / SELECT A SERVICE</span>
-          {tiers.map((t, i) => <button key={t[0]} className={tier === i ? "active" : ""} onClick={() => setTier(i)}><span className="radio">{tier === i && <span />}</span><div><h3>{t[0]}</h3><p>{t[3]}</p><small>{t[2]}</small></div><strong>{t[1]}</strong></button>)}
+          {tiers.map((t, i) => <button key={t[0]} className={tier === i ? "active" : ""} onClick={() => { setTier(i); setBooked(false); }}><span className="radio">{tier === i && <span />}</span><div><h3>{t[0]}</h3><p>{t[3]}</p><small>{t[2]}</small></div><strong>{t[1]}</strong></button>)}
         </div>
         <div className="booking-panel">
-          <span className="mono">02 / CHOOSE A TIME</span><h2>March 2026</h2>
-          <div className="calendar-days">{["MON 16", "TUE 17", "WED 18", "THU 19", "FRI 20"].map((d, i) => <button className={i === 2 ? "active" : ""} key={d}>{d.split(" ")[0]}<strong>{d.split(" ")[1]}</strong></button>)}</div>
+          <span className="mono">02 / SESSION TYPE</span>
+          <div className="consult-type service-session-type"><button className={sessionType === "store" ? "active" : ""} onClick={() => { setSessionType("store"); setBooked(false); }}><Store /><strong>In-Store Session</strong><span>Bring your system to our service desk</span></button><button className={sessionType === "video" ? "active" : ""} onClick={() => { setSessionType("video"); setBooked(false); }}><Video /><strong>Online Video Call</strong><span>Remote consultation with screen sharing</span></button></div>
+          <span className="mono">03 / CHOOSE A TIME</span><h2>March 2026</h2>
+          <label className="date-picker-field service-date-picker"><span className="mono">APPOINTMENT DATE</span><input type="date" min="2026-03-01" value={selectedDate} onChange={(event) => { setSelectedDate(event.target.value); setBooked(false); }} /></label>
+          <div className="calendar-days">{[{ label: "MON 16", value: "2026-03-16" }, { label: "TUE 17", value: "2026-03-17" }, { label: "WED 18", value: "2026-03-18" }, { label: "THU 19", value: "2026-03-19" }, { label: "FRI 20", value: "2026-03-20" }].map((date) => <button className={selectedDate === date.value ? "active" : ""} onClick={() => { setSelectedDate(date.value); setBooked(false); }} key={date.value}>{date.label.split(" ")[0]}<strong>{date.label.split(" ")[1]}</strong></button>)}</div>
           <span className="mono">AVAILABLE TIMES</span>
-          <div className="time-grid">{["9:00 AM", "10:30 AM", "1:00 PM", "2:30 PM", "4:00 PM"].map((t, i) => <button className={i === 2 ? "active" : ""} key={t}>{t}</button>)}</div>
-          <Button onClick={() => setBooked(true)}>{booked ? <><Check /> Appointment reserved</> : <>Book {tiers[tier][0]} <ArrowRight /></>}</Button>
+          <div className="time-grid">{["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"].map((time) => <button className={selectedTime === time ? "active" : ""} onClick={() => { setSelectedTime(time); setBooked(false); }} key={time}>{time}</button>)}</div>
+          <Button onClick={() => setBooked(true)}>{booked ? <><Check /> {sessionType === "store" ? "In-store" : "Video"} appointment reserved</> : <>Book {tiers[tier][0]} <ArrowRight /></>}</Button>
         </div>
       </div>
     </div>
@@ -883,7 +899,7 @@ function Login() {
 }
 
 type AdminView = "overview" | "inventory" | "orders" | "consultations" | "banners";
-type InventoryItem = { name: string; category: string; price: number; stock: number; image: string; discount: number; status: "In Stock" | "Low Stock" | "Out of Stock"; description: string };
+type InventoryItem = { name: string; category: string; price: number; stock: number; image: string; discount: number; status: StockStatus; description: string };
 type AdminOrder = { id: string; customer: string; email: string; type: "pickup" | "delivery"; code: string; total: string; status: string; payment: string; timestamp: string; items: string[] };
 
 function AdminDashboard() {
@@ -894,6 +910,8 @@ function AdminDashboard() {
   const [rangeOpen, setRangeOpen] = useState(false);
   const [dateRange, setDateRange] = useState("Last 30 Days");
   const [customRange, setCustomRange] = useState(false);
+  const [rangeStart, setRangeStart] = useState("2026-03-01");
+  const [rangeEnd, setRangeEnd] = useState("2026-03-30");
   const [inventoryQuery, setInventoryQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [stockFilter, setStockFilter] = useState("All Stock");
@@ -909,10 +927,10 @@ function AdminDashboard() {
   const role = sessionStorage.getItem("simplifyRole") === "admin" ? "admin" : "super-admin";
   const isSuper = role === "super-admin";
   const orders: AdminOrder[] = [
-    { id: "SPC-24081", customer: "Alex Morgan", email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "Mar 16, 2026 · 10:42 AM", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] },
-    { id: "SPC-24080", customer: "Jamie Lee", email: "jamie@example.com", type: "delivery", code: "UPS-4839201", total: "$2,899.00", status: "In transit", payment: "Paid · Digital wallet", timestamp: "Mar 15, 2026 · 4:18 PM", items: ["Apex X7 Prebuilt PC"] },
-    { id: "SPC-24079", customer: "Morgan Reed", email: "morgan@example.com", type: "pickup", code: "CF-71K-2399", total: "$649.00", status: "Preparing", payment: "Pay at pickup", timestamp: "Mar 15, 2026 · 1:04 PM", items: ["Ryzen 9 9950X"] },
-    { id: "SPC-24078", customer: "Taylor Chen", email: "taylor@example.com", type: "delivery", code: "UPS-4839172", total: "$1,299.00", status: "Processing", payment: "Paid · Mastercard •1881", timestamp: "Mar 14, 2026 · 9:31 AM", items: ["GeForce RTX 5080"] },
+    { id: "SPC-24081", customer: "Alex Morgan", email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "2026-03-16T10:42:00", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] },
+    { id: "SPC-24080", customer: "Jamie Lee", email: "jamie@example.com", type: "delivery", code: "UPS-4839201", total: "$2,899.00", status: "In transit", payment: "Paid · Digital wallet", timestamp: "2026-03-15T16:18:00", items: ["Apex X7 Prebuilt PC"] },
+    { id: "SPC-24079", customer: "Morgan Reed", email: "morgan@example.com", type: "pickup", code: "CF-71K-2399", total: "$649.00", status: "Preparing", payment: "Pay at pickup", timestamp: "2026-03-15T13:04:00", items: ["Ryzen 9 9950X"] },
+    { id: "SPC-24078", customer: "Taylor Chen", email: "taylor@example.com", type: "delivery", code: "UPS-4839172", total: "$1,299.00", status: "Processing", payment: "Paid · Mastercard •1881", timestamp: "2026-03-14T09:31:00", items: ["GeForce RTX 5080"] },
   ];
   const visibleOrders = orderType === "all" ? orders : orders.filter((order) => order.type === orderType);
   const filteredInventory = inventory.filter((item) =>
@@ -927,7 +945,7 @@ function AdminDashboard() {
     const item: InventoryItem = {
       name: String(data.get("name")), category: String(data.get("category")), price: Number(data.get("price")), stock,
       image: productPreview || (editing !== "new" && editing ? editing.image : hardwareImages.gpu), discount: Number(data.get("discount")),
-      status: stock === 0 ? "Out of Stock" : "In Stock", description: String(data.get("description")),
+      status: stockStatusFor(stock), description: String(data.get("description")),
     };
     setInventory(editing === "new" ? [...inventory, item] : inventory.map((product) => product.name === editing?.name ? item : product));
     setEditing(null);
@@ -972,7 +990,7 @@ function AdminDashboard() {
             <label>Base price<input name="price" required type="number" min="0" defaultValue={editing === "new" ? "" : editing.price} /></label>
             <label>Stock quantity<input name="stock" required type="number" min="0" value={stockDraft} onChange={(event) => setStockDraft(Math.max(0, Number(event.target.value)))} /></label>
             <label>Discount %<input name="discount" type="number" min="0" max="90" defaultValue={editing === "new" ? 0 : editing.discount} /></label>
-            <div className="stock-preview"><span>Automatic stock status</span><strong className={stockDraft === 0 ? "stock-out-admin" : "stock-ok"}>{stockDraft === 0 ? "Out of Stock" : "In Stock"}</strong><small>{stockDraft} units available</small></div>
+            <div className="stock-preview"><span>Automatic stock status</span><strong className={stockDraft === 0 ? "stock-out-admin" : stockDraft < 5 ? "stock-low" : "stock-ok"}>{stockStatusFor(stockDraft)}</strong><small>{stockDraft} units available</small></div>
             <label className="wide">Description<textarea name="description" required defaultValue={editing === "new" ? "" : editing.description} /></label>
             <label>Spec key<input placeholder="e.g. Memory" /></label><label>Spec value<input placeholder="e.g. 16GB GDDR6X" /></label>
             <label>Spec key<input placeholder="e.g. Boost clock" /></label><label>Spec value<input placeholder="e.g. 2.55 GHz" /></label>
@@ -981,7 +999,7 @@ function AdminDashboard() {
         </form>
       </div>}
       {selectedOrder && <OrderDetails order={selectedOrder} close={() => setSelectedOrder(null)} />}
-      {customRange && <div className="admin-modal-layer" onMouseDown={() => setCustomRange(false)}><div className="date-range-modal" onMouseDown={(event) => event.stopPropagation()}><div><span className="mono">CUSTOM DATE RANGE</span><button onClick={() => setCustomRange(false)}><X /></button></div><h2>Choose reporting period</h2><label>Start date<input type="date" defaultValue="2026-03-01" /></label><label>End date<input type="date" defaultValue="2026-03-30" /></label><Button onClick={() => { setDateRange("Mar 1 – Mar 30"); setCustomRange(false); }}>Apply date range</Button></div></div>}
+      {customRange && <div className="admin-modal-layer" onMouseDown={() => setCustomRange(false)}><div className="date-range-modal" onMouseDown={(event) => event.stopPropagation()}><div><span className="mono">CUSTOM DATE RANGE</span><button onClick={() => setCustomRange(false)}><X /></button></div><h2>Choose reporting period</h2><label>Start date<input type="date" value={rangeStart} max={rangeEnd} onChange={(event) => setRangeStart(event.target.value)} /></label><label>End date<input type="date" value={rangeEnd} min={rangeStart} onChange={(event) => setRangeEnd(event.target.value)} /></label><Button onClick={() => { setDateRange(`${formatDate(rangeStart)} – ${formatDate(rangeEnd)}`); setCustomRange(false); }}>Apply date range</Button></div></div>}
     </div>
   );
 }
@@ -991,7 +1009,7 @@ function AdminOrderTable({ orders, onSelect }: { orders: AdminOrder[]; onSelect:
 }
 
 function OrderDetails({ order, close }: { order: AdminOrder; close: () => void }) {
-  return <div className="detail-layer" onMouseDown={close}><aside className="order-detail-drawer" onMouseDown={(event) => event.stopPropagation()}><div className="detail-drawer-head"><div><span className="mono">ORDER DETAILS</span><h2>{order.id}</h2></div><button onClick={close}><X /></button></div><div className="detail-block"><span className="mono">CUSTOMER</span><strong>{order.customer}</strong><p>{order.email}</p></div><div className="detail-block"><span className="mono">PURCHASED PARTS & SERVICES</span>{order.items.map((item) => <div className="detail-line" key={item}><Package /><span>{item}</span><Check /></div>)}</div><div className="detail-grid"><div><span>Fulfillment</span><strong>{order.type === "pickup" ? "In-store pickup" : "Home delivery"}</strong><small>{order.code}</small></div><div><span>Payment</span><strong>{order.payment}</strong><small>{order.total}</small></div></div><div className="detail-block"><span className="mono">STATUS & TIMESTAMP</span><span className="order-status">{order.status}</span><p>{order.timestamp}</p></div><Button onClick={close}>Done</Button></aside></div>;
+  return <div className="detail-layer" onMouseDown={close}><aside className="order-detail-drawer" onMouseDown={(event) => event.stopPropagation()}><div className="detail-drawer-head"><div><span className="mono">ORDER DETAILS</span><h2>{order.id}</h2></div><button onClick={close}><X /></button></div><div className="detail-block"><span className="mono">CUSTOMER</span><strong>{order.customer}</strong><p>{order.email}</p></div><div className="detail-block"><span className="mono">PURCHASED PARTS & SERVICES</span>{order.items.map((item) => <div className="detail-line" key={item}><Package /><span>{item}</span><Check /></div>)}</div><div className="detail-grid"><div><span>Fulfillment</span><strong>{order.type === "pickup" ? "In-store pickup" : "Home delivery"}</strong><small>{order.code}</small></div><div><span>Payment</span><strong>{order.payment}</strong><small>{order.total}</small></div></div><div className="detail-block"><span className="mono">STATUS & TIMESTAMP</span><span className="order-status">{order.status}</span><p>{formatDateTime(order.timestamp)}</p></div><Button onClick={close}>Done</Button></aside></div>;
 }
 
 function ConsultationAdmin() {
@@ -1014,6 +1032,12 @@ function CustomerPortal() {
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [saved, setSaved] = useState(false);
   const [claimSent, setClaimSent] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [addressAdded, setAddressAdded] = useState(false);
+  const [paymentAdded, setPaymentAdded] = useState(false);
+  const [wallet, setWallet] = useState<"none" | "apple" | "google">("none");
+  const [historyFrom, setHistoryFrom] = useState("2025-01-01");
   const customerName = sessionStorage.getItem("simplifyName") || "Alex Morgan";
   const activeOrders = [
     { id: "SPC-24081", title: "Custom Performance Build", state: "Ready for pickup", progress: 100, type: "pickup", date: "Today", image: rigImage },
@@ -1021,11 +1045,12 @@ function CustomerPortal() {
     { id: "SRV-10482", title: "Full System Tune-Up", state: "Service in progress", progress: 50, type: "service", date: "Ready Mar 18", image: hardwareImages.cooling },
   ];
   const history = [
-    { id: "SPC-23108", date: "Feb 14, 2026", total: "$1,148.00", parts: ["Ryzen 9 9950X", "Samsung 990 Pro 4TB"] },
-    { id: "SPC-22671", date: "Dec 02, 2025", total: "$438.00", parts: ["Kraken Elite 360", "Trident Z5 Neo 64GB"] },
-    { id: "SRV-08942", date: "Oct 19, 2025", total: "$119.00", parts: ["System Tune-Up Service"] },
+    { id: "SPC-23108", date: "2026-02-14", total: "$1,148.00", parts: ["Ryzen 9 9950X", "Samsung 990 Pro 4TB"] },
+    { id: "SPC-22671", date: "2025-12-02", total: "$438.00", parts: ["Kraken Elite 360", "Trident Z5 Neo 64GB"] },
+    { id: "SRV-08942", date: "2025-10-19", total: "$119.00", parts: ["System Tune-Up Service"] },
   ];
-  const orderDetail: AdminOrder = { id: "SPC-24081", customer: customerName, email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "Mar 16, 2026 · 10:42 AM", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] };
+  const filteredHistory = history.filter((order) => order.date >= historyFrom);
+  const orderDetail: AdminOrder = { id: "SPC-24081", customer: customerName, email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "2026-03-16T10:42:00", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] };
   return (
     <div className="customer-portal">
       <div className="portal-head"><div><span className="eyebrow light"><span /> CUSTOMER PROFILE</span><h1>WELCOME BACK,<br />{customerName.split(" ")[0].toUpperCase()}.</h1></div><div className="portal-user"><span>{customerName.split(" ").map((part) => part[0]).join("").slice(0, 2)}</span><div><strong>{customerName}</strong><small>alex@example.com</small></div><Link to="/login" onClick={() => { sessionStorage.removeItem("simplifyRole"); sessionStorage.removeItem("simplifyName"); window.dispatchEvent(new Event("simplify-auth")); }}>Log out</Link></div></div>
@@ -1034,15 +1059,17 @@ function CustomerPortal() {
         {tab === "orders" && <section><div className="portal-section-head"><div><span className="mono">03 ACTIVE</span><h2>Current orders & services</h2></div><Link to="/shop">Continue shopping <ArrowRight /></Link></div>
           <div className="active-order-grid">{activeOrders.map((order) => <article className="active-order-card" key={order.id}><div className="active-order-image"><img src={order.image} alt={order.title} /><span className="mono">{order.id}</span></div><div className="active-order-copy"><div><span className="order-status">{order.state}</span><small>{order.date}</small></div><h3>{order.title}</h3><div className="order-progress"><i><span style={{ width: `${order.progress}%` }} /></i><div><span>Order placed</span><span>{order.type === "pickup" ? "Ready for pickup" : order.type === "delivery" ? "Delivered" : "Service complete"}</span></div></div>{order.type === "pickup" && <div className="pickup-code"><div className="mini-qr">{Array.from({ length: 36 }).map((_, i) => <i className={(i * 5 + i * i) % 4 < 2 ? "on" : ""} key={i} />)}</div><div><span className="mono">STORE PICKUP CODE</span><strong>CF-95X-2408</strong><small>Show this code at the service desk</small></div></div>}<button onClick={() => setSelectedOrder({ ...orderDetail, id: order.id, status: order.state, items: [order.title] })}>View order details <ChevronRight /></button></div></article>)}</div>
         </section>}
-        {tab === "history" && <section className="history-section"><div className="portal-section-head"><div><span className="mono">ACCOUNT HISTORY</span><h2>Past transactions & invoices</h2></div><button>Download all invoices <Download /></button></div>
-          <div className="history-list">{history.map((order) => <div className={`history-order ${historyOpen === order.id ? "open" : ""}`} key={order.id}><button onClick={() => setHistoryOpen(historyOpen === order.id ? null : order.id)}><span className="mono">{order.id}</span><span>{order.date}</span><strong>{order.parts[0]}{order.parts.length > 1 ? ` +${order.parts.length - 1} item` : ""}</strong><b>{order.total}</b><ChevronDown /></button>{historyOpen === order.id && <div className="invoice-detail"><span>Invoice breakdown</span>{order.parts.map((part, index) => <div key={part}><span>{part}</span><b>{index === order.parts.length - 1 ? order.total : "Included"}</b></div>)}<div className="invoice-actions"><button>Download invoice <Receipt /></button><Button>Reorder items <ShoppingBag /></Button></div></div>}</div>)}</div>
+        {tab === "history" && <section className="history-section"><div className="portal-section-head"><div><span className="mono">ACCOUNT HISTORY</span><h2>Past transactions & invoices</h2></div><div className="history-head-actions"><label>From date<input type="date" value={historyFrom} onChange={(event) => setHistoryFrom(event.target.value)} /></label><button>Download all invoices <Download /></button></div></div>
+          <div className="history-list">{filteredHistory.map((order) => <div className={`history-order ${historyOpen === order.id ? "open" : ""}`} key={order.id}><button onClick={() => setHistoryOpen(historyOpen === order.id ? null : order.id)}><span className="mono">{order.id}</span><time dateTime={order.date}>{formatDate(order.date)}</time><strong>{order.parts[0]}{order.parts.length > 1 ? ` +${order.parts.length - 1} item` : ""}</strong><b>{order.total}</b><ChevronDown /></button>{historyOpen === order.id && <div className="invoice-detail"><span>Invoice breakdown</span>{order.parts.map((part, index) => <div key={part}><span>{part}</span><b>{index === order.parts.length - 1 ? order.total : "Included"}</b></div>)}<div className="invoice-actions"><button>Download invoice <Receipt /></button><Button>Reorder items <ShoppingBag /></Button></div></div>}</div>)}</div>
         </section>}
-        {tab === "profile" && <PortalForm kicker="PERSONAL INFO" title="Profile & security" onSave={() => setSaved(true)} saved={saved}><label>Full name<input defaultValue={customerName} /></label><label>Phone number<input defaultValue="+1 (555) 014-8820" /></label><label>Email address<input type="email" defaultValue="alex@example.com" /></label><label>Current password<input type="password" placeholder="Required to change password" /></label><label>New password<input type="password" placeholder="At least 8 characters" /></label></PortalForm>}
-        {tab === "addresses" && <section><div className="portal-section-head"><div><span className="mono">ADDRESS BOOK</span><h2>Shipping & billing</h2></div><button><Plus />Add address</button></div><div className="address-grid"><article><span className="default-badge">DEFAULT SHIPPING</span><h3>Home</h3><p>123 Technology Drive<br />Austin, TX 78701</p><div><button>Edit</button><button>Set as billing</button></div></article><article><span>BILLING</span><h3>Studio</h3><p>88 Circuit Avenue<br />Austin, TX 78704</p><div><button>Edit</button><button>Set as default</button></div></article><article className="address-add"><Plus /><strong>Add another address</strong><span>Street, city and ZIP code</span></article></div></section>}
-        {tab === "payments" && <section><div className="portal-section-head"><div><span className="mono">SECURE PAYMENT VAULT</span><h2>Saved payment methods</h2></div><button><Plus />Add payment method</button></div><div className="payment-methods"><article><CreditCard /><span><strong>Visa ending in 4242</strong><small>Expires 08 / 28 · Default</small></span><button><MoreVertical /></button></article><article><Wallet /><span><strong>Digital wallet</strong><small>alex@example.com · Connected</small></span><button>Disconnect</button></article></div></section>}
-        {tab === "warranty" && <section className="warranty-portal"><div className="portal-section-head"><div><span className="mono">HARDWARE COVERAGE</span><h2>Warranty claims</h2></div><span className="claim-status">{claimSent ? "Pending Review" : "No open claims"}</span></div><div className="warranty-layout"><form onSubmit={(event) => { event.preventDefault(); setClaimSent(true); }}><label>Purchased item<select required><option value="">Select an eligible item</option><option>GeForce RTX 4080 Super</option><option>Ryzen 9 9950X</option><option>Apex X7 Prebuilt PC</option></select></label><label>Serial number / order reference<input required placeholder="SN-0000 or SPC-00000" /></label><label>Describe the hardware issue<textarea required placeholder="Include symptoms, when the issue began, and troubleshooting attempted." /></label><label className="claim-upload"><Upload /><strong>Upload diagnostic images or video</strong><input type="file" accept="image/*,video/*" multiple /></label><Button type="submit">Submit warranty claim <ArrowRight /></Button></form><aside><ShieldCheck /><h3>3-year system coverage</h3><p>Claims are reviewed by a hardware specialist within one business day.</p><div><span>1</span>Pending review</div><div><span>2</span>Approved</div><div><span>3</span>Part replacement in progress</div></aside></div></section>}
+        {tab === "profile" && <PortalForm kicker="PERSONAL INFO" title="Profile & security" onSave={() => setSaved(true)} saved={saved}><label>Full name<input defaultValue={customerName} /></label><label>Date of birth<input type="date" defaultValue="1992-06-18" max="2010-12-31" /></label><label>Phone number<input defaultValue="+1 (555) 014-8820" /></label><label>Email address<input type="email" defaultValue="alex@example.com" /></label><label>Current password<input type="password" placeholder="Required to change password" /></label><label>New password<input type="password" placeholder="At least 8 characters" /></label></PortalForm>}
+        {tab === "addresses" && <section><div className="portal-section-head"><div><span className="mono">ADDRESS BOOK</span><h2>Saved address book</h2></div><button onClick={() => setAddressOpen(true)}><Plus />Add new address</button></div><div className="address-grid"><article><span className="default-badge">DEFAULT SHIPPING</span><h3>Home</h3><p>123 Technology Drive<br />Austin, TX 78701</p><div><button>Edit</button><button>Set as billing</button></div></article><article><span>BILLING</span><h3>Studio</h3><p>88 Circuit Avenue<br />Austin, TX 78704</p><div><button>Edit</button><button>Set as default</button></div></article>{addressAdded && <article><span>SHIPPING</span><h3>New address</h3><p>Saved securely to your address book</p><div><button>Edit</button><button>Set as default</button></div></article>}<button className="address-add address-add-button" onClick={() => setAddressOpen(true)}><Plus /><strong>Add another address</strong><span>Street, city and postal code</span></button></div></section>}
+        {tab === "payments" && <section><div className="portal-section-head"><div><span className="mono">SECURE PAYMENT VAULT</span><h2>Saved payment methods</h2></div><button onClick={() => setPaymentOpen(true)}><Plus />Add new payment method</button></div><div className="payment-methods"><article><CreditCard /><span><strong>Visa ending in 4242</strong><small>Expires 08 / 28 · Default</small></span><button><MoreVertical /></button></article><article><Wallet /><span><strong>Digital wallet</strong><small>alex@example.com · Connected</small></span><button>Disconnect</button></article>{paymentAdded && <article><CreditCard /><span><strong>New card saved</strong><small>Encrypted · Ready to use</small></span><button><MoreVertical /></button></article>}</div></section>}
+        {tab === "warranty" && <section className="warranty-portal"><div className="portal-section-head"><div><span className="mono">HARDWARE COVERAGE</span><h2>Warranty claims</h2></div><span className="claim-status">{claimSent ? "Pending Review" : "No open claims"}</span></div><div className="warranty-layout"><form onSubmit={(event) => { event.preventDefault(); setClaimSent(true); }}><label>Purchased item<select required><option value="">Select an eligible item</option><option>GeForce RTX 4080 Super</option><option>Ryzen 9 9950X</option><option>Apex X7 Prebuilt PC</option></select></label><label>Purchase date<input required type="date" max="2026-12-31" defaultValue="2026-02-14" /></label><label>Serial number / order reference<input required placeholder="SN-0000 or SPC-00000" /></label><label>Describe the hardware issue<textarea required placeholder="Include symptoms, when the issue began, and troubleshooting attempted." /></label><label className="claim-upload"><Upload /><strong>Upload diagnostic images or video</strong><input type="file" accept="image/*,video/*" multiple /></label><Button type="submit">Submit warranty claim <ArrowRight /></Button></form><aside><ShieldCheck /><h3>3-year system coverage</h3><p>Claims are reviewed by a hardware specialist within one business day.</p><div><span>1</span>Pending review</div><div><span>2</span>Approved</div><div><span>3</span>Part replacement in progress</div></aside></div></section>}
       </div>
       {selectedOrder && <OrderDetails order={selectedOrder} close={() => setSelectedOrder(null)} />}
+      {addressOpen && <div className="profile-modal-layer" onMouseDown={() => setAddressOpen(false)}><aside className="profile-modal" onMouseDown={(event) => event.stopPropagation()}><div className="profile-modal-head"><div><span className="mono">SAVED ADDRESS BOOK</span><h2>Add new address</h2></div><button onClick={() => setAddressOpen(false)} aria-label="Close address form"><X /></button></div><form onSubmit={(event) => { event.preventDefault(); setAddressAdded(true); setAddressOpen(false); }}><label className="wide">Full name<input required defaultValue={customerName} autoComplete="name" /></label><label className="wide">Street address<input required placeholder="123 Technology Drive" autoComplete="street-address" /></label><label>City<input required placeholder="Austin" autoComplete="address-level2" /></label><label>State / Province<input required placeholder="Texas" autoComplete="address-level1" /></label><label>Postal code<input required placeholder="78701" autoComplete="postal-code" /></label><label>Phone number<input required type="tel" placeholder="+1 (555) 000-0000" autoComplete="tel" /></label><label className="profile-check wide"><input type="checkbox" />Set as default address</label><Button className="wide" type="submit"><Save />Save address</Button></form></aside></div>}
+      {paymentOpen && <div className="profile-modal-layer" onMouseDown={() => setPaymentOpen(false)}><aside className="profile-modal" onMouseDown={(event) => event.stopPropagation()}><div className="profile-modal-head"><div><span className="mono">SECURE PAYMENT VAULT</span><h2>Add payment method</h2></div><button onClick={() => setPaymentOpen(false)} aria-label="Close payment form"><X /></button></div><form onSubmit={(event) => { event.preventDefault(); setPaymentAdded(true); setPaymentOpen(false); }}><label className="wide">Cardholder name<input required defaultValue={customerName} autoComplete="cc-name" /></label><label className="wide">Card number<input required inputMode="numeric" placeholder="0000 0000 0000 0000" autoComplete="cc-number" /></label><label>Expiry month<input required type="month" min="2026-01" autoComplete="cc-exp" /></label><label>CVV<input required inputMode="numeric" placeholder="123" autoComplete="cc-csc" /></label><div className="wallet-link wide"><span className="mono">OR LINK A DIGITAL WALLET</span><div><button type="button" className={wallet === "apple" ? "active" : ""} onClick={() => setWallet(wallet === "apple" ? "none" : "apple")}><Wallet />Apple Pay</button><button type="button" className={wallet === "google" ? "active" : ""} onClick={() => setWallet(wallet === "google" ? "none" : "google")}><Wallet />Google Pay</button></div></div><Button className="wide" type="submit"><CreditCard />Save card</Button></form></aside></div>}
     </div>
   );
 }
@@ -1078,7 +1105,7 @@ function Checkout() {
               <button className={payment === "wallet" ? "active" : ""} onClick={() => setPayment("wallet")}><Wallet />Digital wallet</button>
               {fulfillment === "pickup" && <button className={payment === "store" ? "active" : ""} onClick={() => setPayment("store")}><Store />Pay at store</button>}
             </div>
-            {payment === "card" && <div className="checkout-fields card-fields"><label className="wide">Card number<input placeholder="0000 0000 0000 0000" /></label><label>Expiry date<input placeholder="MM / YY" /></label><label>Security code<input placeholder="CVC" /></label><label className="wide">Name on card<input placeholder="Alex Morgan" /></label></div>}
+            {payment === "card" && <div className="checkout-fields card-fields"><label className="wide">Card number<input placeholder="0000 0000 0000 0000" /></label><label>Expiry month<input type="month" min="2026-01" /></label><label>Security code<input placeholder="CVC" /></label><label className="wide">Name on card<input placeholder="Alex Morgan" /></label></div>}
             {payment === "wallet" && <div className="wallet-options"><button>Pay</button><button>G Pay</button><p>You&apos;ll be redirected to your selected wallet to authorize payment.</p></div>}
             {payment === "store" && <div className="pay-store-panel"><Store /><div><strong>Reserve now, pay at pickup</strong><p>Your items will be held for 24 hours. Bring your pickup code and a valid photo ID.</p></div></div>}
           </section>
