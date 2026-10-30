@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import { stockStatusFor, type StockStatus } from "./schema";
 import {
@@ -13,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   CircleGauge,
+  Clipboard,
   CreditCard,
   DollarSign,
   Download,
@@ -60,6 +63,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   Link,
   NavLink,
@@ -117,6 +121,13 @@ function addCartItem(item: Omit<CartItem, "quantity">) {
   }
   window.dispatchEvent(new CustomEvent("simplify-cart-add", { detail: item }));
   return true;
+}
+
+function logoutApp() {
+  void fetch("/api/app-auth/logout", { method: "POST" });
+  sessionStorage.removeItem("simplifyRole");
+  sessionStorage.removeItem("simplifyName");
+  window.dispatchEvent(new Event("simplify-auth"));
 }
 
 function formatDate(value: string) {
@@ -222,7 +233,7 @@ function Header() {
         <div className="header-actions">
           <button className="theme-toggle" onClick={() => setTheme(theme === "light" ? "dark" : "light")} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}><Sun size={15} /><span><i /></span><Moon size={15} /></button>
           <button className="header-cart" aria-label={`Shopping cart with ${itemCount} items`} onClick={() => setCartOpen(true)}><ShoppingBag size={18} /><span>Cart</span><b>{itemCount}</b></button>
-          {role ? <div className="account-control"><button className="account-avatar" onClick={() => setAccountOpen(!accountOpen)} aria-label="Open account menu">{accountName.split(" ").map((part) => part[0]).join("").slice(0, 2)}<ChevronDown size={13} /></button>{accountOpen && <div className="account-menu"><strong>{accountName}</strong><span>{role === "customer" ? "Customer account" : role === "super-admin" ? "Super Administrator" : "Administrator"}</span><Link to={role === "customer" ? "/account" : "/admin"} onClick={() => setAccountOpen(false)}><User />Profile</Link>{role === "customer" && <Link to="/account" onClick={() => setAccountOpen(false)}><Package />Orders</Link>}<Link to={role === "customer" ? "/account" : "/admin"} onClick={() => setAccountOpen(false)}><SlidersHorizontal />Settings</Link><button onClick={() => { sessionStorage.clear(); window.dispatchEvent(new Event("simplify-auth")); setAccountOpen(false); }}>Log out</button></div>}</div> : <Link to="/login" className="login-pill">Log In / Register</Link>}
+          {role ? <div className="account-control"><button className="account-avatar" onClick={() => setAccountOpen(!accountOpen)} aria-label="Open account menu">{accountName.split(" ").map((part) => part[0]).join("").slice(0, 2)}<ChevronDown size={13} /></button>{accountOpen && <div className="account-menu"><strong>{accountName}</strong><span>{role === "customer" ? "Customer account" : role === "super-admin" ? "Super Administrator" : "Administrator"}</span><Link to={role === "customer" ? "/account" : "/staff"} onClick={() => setAccountOpen(false)}><User />Profile</Link>{role === "customer" && <Link to="/account" onClick={() => setAccountOpen(false)}><Package />Orders</Link>}<Link to={role === "customer" ? "/account" : "/staff"} onClick={() => setAccountOpen(false)}><SlidersHorizontal />Settings</Link><button onClick={() => { logoutApp(); setAccountOpen(false); }}>Log out</button></div>}</div> : <Link to="/login" className="login-pill">Log In / Register</Link>}
           <button className="icon-btn mobile-menu" aria-label="Open menu" onClick={() => setOpen(true)}><Menu size={21} /></button>
         </div>
       </header>
@@ -239,7 +250,7 @@ function Header() {
             ["/diagnose", "Diagnose"],
             ["/expert", "Expert Advice"],
           ].map(([to, label]) => <NavLink key={to} to={to} onClick={() => setOpen(false)}>{label}<ArrowRight /></NavLink>)}
-          <div className="mobile-drawer-tools"><button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon /> : <Sun />}Switch to {theme === "light" ? "dark" : "light"} theme</button><Link to={role === "customer" ? "/account" : role ? "/admin" : "/login"} onClick={() => setOpen(false)}><User />{role ? "My account" : "Log In / Register"}</Link></div>
+          <div className="mobile-drawer-tools"><button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? <Moon /> : <Sun />}Switch to {theme === "light" ? "dark" : "light"} theme</button><Link to={role === "customer" ? "/account" : role ? "/staff" : "/login"} onClick={() => setOpen(false)}><User />{role ? "My account" : "Log In / Register"}</Link></div>
         </div>
       )}
       {cartOpen && <div className="cart-layer" onMouseDown={() => setCartOpen(false)}><aside className="cart-drawer" onMouseDown={(event) => event.stopPropagation()}>
@@ -852,58 +863,103 @@ function CommunityThread() {
 
 function Login() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const resetToken = new URLSearchParams(window.location.search).get("token");
+  const [activeResetToken, setActiveResetToken] = useState(resetToken);
+  const [mode, setMode] = useState<"login" | "register" | "forgot" | "reset">(resetToken ? "reset" : "login");
+  const [stage, setStage] = useState<"credentials" | "otp">("credentials");
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!identity.trim() || !password.trim() || (mode === "register" && (!fullName.trim() || !phone.trim()))) {
-      setError("Complete all required fields to continue.");
-      return;
-    }
-    if (mode === "register" && password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    const normalized = identity.toLowerCase();
-    const role = normalized.includes("super") ? "super-admin" : normalized.includes("admin") ? "admin" : "customer";
-    sessionStorage.setItem("simplifyRole", role);
-    sessionStorage.setItem("simplifyName", mode === "register" ? fullName : role === "customer" ? "Alex Morgan" : role === "super-admin" ? "Morgan Reed" : "Alex Kim");
-    if (role === "customer" && !localStorage.getItem("simplifyCart")) localStorage.setItem("simplifyCart", JSON.stringify(defaultCart));
-    window.dispatchEvent(new Event("simplify-auth"));
-    navigate(role === "customer" ? "/account" : "/admin");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const request = async (path: string, data: Record<string, unknown>) => {
+    const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const result = await response.json() as { error?: string; message?: string; user?: { fullName: string; role: string }; delivery?: string; developmentResetToken?: string };
+    if (!response.ok) throw new Error(result.error || "Unable to complete the request.");
+    return result;
   };
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+    setBusy(true);
+    try {
+      if (mode === "forgot") {
+        const result = await request("/api/app-auth/forgot-password", { email: identity });
+        setMessage(result.message || "Check your email for a reset link.");
+        if (result.developmentResetToken) {
+          setActiveResetToken(result.developmentResetToken);
+          setMode("reset");
+        }
+      } else if (mode === "reset") {
+        if (password !== confirmPassword) throw new Error("Passwords do not match.");
+        await request("/api/app-auth/reset-password", { token: activeResetToken, password });
+        setMode("login");
+        setMessage("Password updated. You can now log in.");
+      } else if (stage === "otp") {
+        const result = await request("/api/app-auth/verify-otp", { code: otp });
+        if (!result.user) throw new Error("Unable to load your account.");
+        const role = result.user.role === "standard-admin" ? "admin" : result.user.role;
+        sessionStorage.setItem("simplifyRole", role);
+        sessionStorage.setItem("simplifyName", result.user.fullName);
+        if (role === "customer" && !localStorage.getItem("simplifyCart")) localStorage.setItem("simplifyCart", JSON.stringify(defaultCart));
+        window.dispatchEvent(new Event("simplify-auth"));
+        navigate(role === "customer" ? "/account" : "/staff");
+      } else {
+        if (mode === "register") {
+          if (password !== confirmPassword) throw new Error("Passwords do not match.");
+          await request("/api/app-auth/register", { email: identity, password, fullName, phoneNumber: phone });
+        }
+        const result = await request("/api/app-auth/login", { email: identity, password });
+        setStage("otp");
+        setMessage(result.delivery === "development" ? "Development mode: enter 111111." : "We sent a verification code to your email or phone.");
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to continue.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="login-page">
-      <div className="login-visual"><div className="login-grid" /><span className="eyebrow light"><span /> SIMPLIFY.PC ACCOUNT</span><h1>YOUR SYSTEM.<br />YOUR CONTROL.</h1><p>Track builds, manage orders, and get support from one secure workspace.</p><div className="login-stats"><span><b>24/7</b>Order tracking</span><span><b>3 YR</b>System coverage</span><span><b>1:1</b>Expert support</span></div></div>
+      <div className="login-visual"><div className="login-grid" /><span className="eyebrow light"><span /> SIMPLIFY.PC SECURITY</span><h1>YOUR SYSTEM.<br />YOUR CONTROL.</h1><p>Every account is protected by a mandatory second verification step.</p><div className="login-stats"><span><b>2FA</b>Every role</span><span><b>10 MIN</b>OTP expiry</span><span><b>24/7</b>Order access</span></div></div>
       <form className="login-card" onSubmit={submit}>
         <Link to="/" className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></Link>
-        <div className="auth-tabs"><button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>Log in</button><button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>Create account</button></div>
-        <div><span className="mono">{mode === "login" ? "SECURE ACCESS" : "NEW CUSTOMER"}</span><h2>{mode === "login" ? "LOG IN" : "REGISTER"}</h2><p>{mode === "login" ? "Use your account credentials to continue." : "Create your customer workspace in under a minute."}</p></div>
-        {mode === "register" && <label>Full name<input value={fullName} onChange={(event) => { setFullName(event.target.value); setError(""); }} placeholder="Alex Morgan" autoComplete="name" /></label>}
-        <label>Email address<input type="email" value={identity} onChange={(event) => { setIdentity(event.target.value); setError(""); }} placeholder="you@example.com" autoComplete="username" /></label>
-        {mode === "register" && <label>Phone number<input type="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setError(""); }} placeholder="+1 (555) 000-0000" autoComplete="tel" /></label>}
-        <label>Password<div className="password-field"><input type="password" value={password} onChange={(event) => { setPassword(event.target.value); setError(""); }} placeholder="Enter your password" autoComplete={mode === "login" ? "current-password" : "new-password"} /><span>••••</span></div></label>
-        {mode === "register" && <label>Confirm password<div className="password-field"><input type="password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setError(""); }} placeholder="Repeat your password" autoComplete="new-password" /><span>••••</span></div></label>}
-        {mode === "login" && <div className="login-options"><label><input type="checkbox" /> Remember me</label><button type="button">Forgot password?</button></div>}
+        {stage === "credentials" && mode !== "forgot" && mode !== "reset" && <div className="auth-tabs"><button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>Log in</button><button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>Create account</button></div>}
+        <div><span className="mono">{stage === "otp" ? "UNIVERSAL OTP GATE" : mode === "forgot" ? "ACCOUNT RECOVERY" : mode === "reset" ? "SECURE RESET" : "SECURE ACCESS"}</span><h2>{stage === "otp" ? "VERIFY" : mode === "forgot" ? "RESET" : mode === "reset" ? "NEW PASSWORD" : mode === "login" ? "LOG IN" : "REGISTER"}</h2><p>{stage === "otp" ? "Enter the six-digit code to finish signing in." : mode === "forgot" ? "We’ll email a secure password reset link." : mode === "reset" ? "Choose a new password for your account." : "Use your account credentials to continue."}</p></div>
+        {stage === "otp" ? <label>Verification code<input inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} placeholder="111111" autoComplete="one-time-code" /></label> : <>
+          {mode === "register" && <label>Full name<input value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Alex Morgan" autoComplete="name" required /></label>}
+          {mode !== "reset" && <label>Email address<input type="email" value={identity} onChange={(event) => setIdentity(event.target.value)} placeholder="you@example.com" autoComplete="username" required /></label>}
+          {mode === "register" && <label>Phone number<input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+62 812 0000 0000" autoComplete="tel" /></label>}
+          {mode !== "forgot" && <label>Password<div className="password-field"><input type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Minimum 8 characters" autoComplete={mode === "login" ? "current-password" : "new-password"} required /><span>••••</span></div></label>}
+          {(mode === "register" || mode === "reset") && <label>Confirm password<div className="password-field"><input type="password" minLength={8} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat your password" autoComplete="new-password" required /><span>••••</span></div></label>}
+        </>}
+        {stage === "credentials" && mode === "login" && <div className="login-options"><label><input type="checkbox" /> Remember me</label><button type="button" onClick={() => setMode("forgot")}>Forgot password?</button></div>}
+        {(mode === "forgot" || mode === "reset") && stage === "credentials" && <button type="button" className="auth-back" onClick={() => setMode("login")}><ArrowLeft /> Back to login</button>}
+        {message && <p className="login-message">{message}</p>}
         {error && <p className="login-error">{error}</p>}
-        <Button type="submit">{mode === "login" ? "Log in" : "Create account"} <ArrowRight /></Button>
-        <small>Smart routing demo: use an email containing <b>super</b>, <b>admin</b>, or any customer email. Any password is accepted.</small>
+        <Button type="submit" disabled={busy}>{busy ? "Please wait…" : stage === "otp" ? "Verify & continue" : mode === "forgot" ? "Send reset link" : mode === "reset" ? "Update password" : mode === "login" ? "Continue securely" : "Create account"} <ArrowRight /></Button>
       </form>
     </div>
   );
 }
 
-type AdminView = "overview" | "inventory" | "orders" | "consultations" | "banners";
+type AdminView = "overview" | "inventory" | "orders" | "consultations" | "banners" | "vouchers";
 type InventoryItem = { name: string; category: string; price: number; stock: number; image: string; discount: number; status: StockStatus; description: string };
 type AdminOrder = { id: string; customer: string; email: string; type: "pickup" | "delivery"; code: string; total: string; status: string; payment: string; timestamp: string; items: string[] };
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [view, setView] = useState<AdminView>("overview");
+  const [verifiedRole, setVerifiedRole] = useState<"admin" | "super-admin" | null>(null);
+  const [accessChecked, setAccessChecked] = useState(false);
   const [orderType, setOrderType] = useState<"all" | "pickup" | "delivery">("all");
   const [editing, setEditing] = useState<InventoryItem | "new" | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
@@ -924,7 +980,19 @@ function AdminDashboard() {
     { name: "Trident Z5 Neo 64GB", category: "RAM", price: 219, stock: 42, image: hardwareImages.memory, discount: 10, status: "In Stock", description: "DDR5-6400 dual-channel memory" },
     { name: "Kraken Elite 360", category: "CPU Cooler", price: 279, stock: 0, image: hardwareImages.cooling, discount: 0, status: "Out of Stock", description: "360mm liquid CPU cooler" },
   ]);
-  const role = sessionStorage.getItem("simplifyRole") === "admin" ? "admin" : "super-admin";
+  useEffect(() => {
+    fetch("/api/app-auth/me").then(async (response) => {
+      const data = await response.json() as { user?: { role?: string } };
+      const role = data.user?.role === "standard-admin" ? "admin" : data.user?.role === "super-admin" ? "super-admin" : null;
+      setVerifiedRole(role);
+      setAccessChecked(true);
+      if (!role) navigate("/login");
+    }).catch(() => {
+      setAccessChecked(true);
+      navigate("/login");
+    });
+  }, [navigate]);
+  const role = verifiedRole;
   const isSuper = role === "super-admin";
   const orders: AdminOrder[] = [
     { id: "SPC-24081", customer: "Alex Morgan", email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "2026-03-16T10:42:00", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] },
@@ -951,13 +1019,14 @@ function AdminDashboard() {
     setEditing(null);
     setProductPreview("");
   };
-  const titles: Record<AdminView, string> = { overview: "Business overview", inventory: "Inventory & products", orders: "Orders & fulfillment", consultations: "Consultation schedule", banners: "Advertising control center" };
+  const titles: Record<AdminView, string> = { overview: "Business overview", inventory: "Inventory & products", orders: "Orders & fulfillment", consultations: "Consultation schedule", banners: "Advertising control center", vouchers: "Voucher management" };
+  if (!accessChecked || !role) return <main className="app-loading">Verifying staff access…</main>;
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-nav">
         <div><span className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></span><small className="mono">ADMIN CONTROL</small></div>
-        <nav>{([["overview", BarChart3, "Overview"], ["inventory", Package, "Inventory"], ["orders", Receipt, "Orders"], ["consultations", Users, "Consultations"], ["banners", Megaphone, "Banners"]] as const).map(([id, Icon, label]) => <button className={view === id ? "active" : ""} onClick={() => setView(id)} key={id}><Icon />{label}</button>)}</nav>
-        <div className="admin-user"><span>{isSuper ? "MR" : "AK"}</span><div><strong>{isSuper ? "Morgan Reed" : "Alex Kim"}</strong><small>{isSuper ? "Super Administrator" : "Standard Administrator"}</small></div><Link to="/login" onClick={() => { sessionStorage.removeItem("simplifyRole"); sessionStorage.removeItem("simplifyName"); window.dispatchEvent(new Event("simplify-auth")); }}><ArrowLeft /></Link></div>
+        <nav>{([["overview", BarChart3, "Overview"], ["inventory", Package, "Inventory"], ["orders", Receipt, "Orders"], ["vouchers", Receipt, "Vouchers"], ["consultations", Users, "Consultations"], ["banners", Megaphone, "Banners"]] as const).map(([id, Icon, label]) => <button className={view === id ? "active" : ""} onClick={() => setView(id)} key={id}><Icon />{label}</button>)}</nav>
+        <div className="admin-user"><span>{isSuper ? "MR" : "AK"}</span><div><strong>{isSuper ? "Morgan Reed" : "Alex Kim"}</strong><small>{isSuper ? "Super Administrator" : "Standard Administrator"}</small></div><Link to="/login" onClick={logoutApp}><ArrowLeft /></Link></div>
       </aside>
       <div className="dashboard-main">
         <header className="dashboard-header"><div><span className="mono">{isSuper ? "SUPER ADMIN" : "ADMIN"} / {view.toUpperCase()}</span><h1>{titles[view]}</h1></div><div><span className="dashboard-live"><i />Live store</span>{view === "inventory" && <Button onClick={() => { setProductPreview(""); setStockDraft(0); setEditing("new"); }}><Plus />Add product</Button>}<div className="admin-avatar">{isSuper ? "MR" : "AK"}</div></div></header>
@@ -978,6 +1047,7 @@ function AdminDashboard() {
         {view === "orders" && <div className="dashboard-content"><div className="order-tabs"><button className={orderType === "all" ? "active" : ""} onClick={() => setOrderType("all")}>All transactions <span>{orders.length}</span></button><button className={orderType === "pickup" ? "active" : ""} onClick={() => setOrderType("pickup")}>Store pickup <span>{orders.filter((order) => order.type === "pickup").length}</span></button><button className={orderType === "delivery" ? "active" : ""} onClick={() => setOrderType("delivery")}>Delivery <span>{orders.filter((order) => order.type === "delivery").length}</span></button></div><div className="orders-panel"><div className="panel-heading"><div><span className="mono">FULFILLMENT QUEUE</span><h2>{orderType === "all" ? "All active orders" : orderType === "pickup" ? "Store pickup orders" : "Delivery orders"}</h2></div><button>Export <Upload /></button></div><AdminOrderTable orders={visibleOrders} onSelect={setSelectedOrder} /></div></div>}
         {view === "consultations" && <ConsultationAdmin />}
         {view === "banners" && <BannerAdmin />}
+        {view === "vouchers" && <VoucherManagement />}
       </div>
       {editing && <div className="admin-modal-layer" onMouseDown={() => setEditing(null)}>
         <form className="product-form-modal product-editor" onMouseDown={(event) => event.stopPropagation()} onSubmit={saveProduct}>
@@ -1010,6 +1080,102 @@ function AdminOrderTable({ orders, onSelect }: { orders: AdminOrder[]; onSelect:
 
 function OrderDetails({ order, close }: { order: AdminOrder; close: () => void }) {
   return <div className="detail-layer" onMouseDown={close}><aside className="order-detail-drawer" onMouseDown={(event) => event.stopPropagation()}><div className="detail-drawer-head"><div><span className="mono">ORDER DETAILS</span><h2>{order.id}</h2></div><button onClick={close}><X /></button></div><div className="detail-block"><span className="mono">CUSTOMER</span><strong>{order.customer}</strong><p>{order.email}</p></div><div className="detail-block"><span className="mono">PURCHASED PARTS & SERVICES</span>{order.items.map((item) => <div className="detail-line" key={item}><Package /><span>{item}</span><Check /></div>)}</div><div className="detail-grid"><div><span>Fulfillment</span><strong>{order.type === "pickup" ? "In-store pickup" : "Home delivery"}</strong><small>{order.code}</small></div><div><span>Payment</span><strong>{order.payment}</strong><small>{order.total}</small></div></div><div className="detail-block"><span className="mono">STATUS & TIMESTAMP</span><span className="order-status">{order.status}</span><p>{formatDateTime(order.timestamp)}</p></div><Button onClick={close}>Done</Button></aside></div>;
+}
+
+type VoucherRecord = {
+  id: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minPurchase: number;
+  expiryDate: string;
+  isActive: boolean;
+};
+
+function VoucherManagement() {
+  const [vouchers, setVouchers] = useState<VoucherRecord[]>([]);
+  const [editing, setEditing] = useState<VoucherRecord | "new" | null>(null);
+  const [error, setError] = useState("");
+
+  const load = async () => {
+    const response = await fetch("/api/app-vouchers");
+    const data = await response.json() as { vouchers?: VoucherRecord[]; error?: string };
+    if (!response.ok) throw new Error(data.error || "Unable to load vouchers.");
+    setVouchers(data.vouchers || []);
+  };
+
+  useEffect(() => {
+    load().catch((cause) => setError(cause instanceof Error ? cause.message : "Unable to load vouchers."));
+  }, []);
+
+  const save = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const payload = {
+      id: editing !== "new" && editing ? editing.id : undefined,
+      code: form.get("code"),
+      discountType: form.get("discountType"),
+      discountValue: Number(form.get("discountValue")),
+      minPurchase: Number(form.get("minPurchase")),
+      expiryDate: form.get("expiryDate"),
+      isActive: form.get("isActive") === "on",
+    };
+    const response = await fetch("/api/app-vouchers", {
+      method: editing === "new" ? "POST" : "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json() as { error?: string };
+    if (!response.ok) {
+      setError(data.error || "Unable to save voucher.");
+      return;
+    }
+    setEditing(null);
+    setError("");
+    await load();
+  };
+
+  const toggle = async (voucher: VoucherRecord) => {
+    await fetch("/api/app-vouchers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...voucher, isActive: !voucher.isActive }),
+    });
+    await load();
+  };
+
+  const remove = async (voucher: VoucherRecord) => {
+    if (!window.confirm(`Delete voucher ${voucher.code}?`)) return;
+    await fetch(`/api/app-vouchers?id=${encodeURIComponent(voucher.id)}`, { method: "DELETE" });
+    await load();
+  };
+
+  return <div className="dashboard-content voucher-admin">
+    <div className="panel-heading"><div><span className="mono">PROMOTION ENGINE</span><h2>Discount vouchers</h2><p>Create targeted offers and control availability in real time.</p></div><Button onClick={() => setEditing("new")}><Plus />Create voucher</Button></div>
+    {error && <p className="admin-alert">{error}</p>}
+    <div className="voucher-grid">
+      {vouchers.map((voucher) => <article key={voucher.id} className={!voucher.isActive ? "inactive" : ""}>
+        <div><span className="mono">{voucher.isActive ? "ACTIVE" : "INACTIVE"}</span><strong>{voucher.code}</strong></div>
+        <b>{voucher.discountType === "percentage" ? `${voucher.discountValue}% OFF` : `$${voucher.discountValue.toLocaleString()} OFF`}</b>
+        <p>Minimum ${voucher.minPurchase.toLocaleString()} · Expires {formatDate(voucher.expiryDate.slice(0, 10))}</p>
+        <div><button onClick={() => setEditing(voucher)}><Edit3 />Edit</button><button onClick={() => toggle(voucher)}>{voucher.isActive ? "Deactivate" : "Activate"}</button><button className="danger" onClick={() => remove(voucher)}><Trash2 />Delete</button></div>
+      </article>)}
+      {vouchers.length === 0 && <div className="voucher-empty"><Receipt /><strong>No vouchers yet</strong><span>Create your first campaign to make it available at checkout.</span></div>}
+    </div>
+    {editing && <div className="admin-modal-layer" onMouseDown={() => setEditing(null)}><form className="product-form-modal" onSubmit={save} onMouseDown={(event) => event.stopPropagation()}>
+      <div><span className="mono">{editing === "new" ? "NEW VOUCHER" : "EDIT VOUCHER"}</span><button type="button" onClick={() => setEditing(null)}><X /></button></div>
+      <h2>{editing === "new" ? "Create promotion" : editing.code}</h2>
+      <div className="admin-form-grid">
+        <label>Voucher code<input name="code" required maxLength={50} defaultValue={editing === "new" ? "" : editing.code} placeholder="BUILD10" /></label>
+        <label>Discount type<select name="discountType" defaultValue={editing === "new" ? "percentage" : editing.discountType}><option value="percentage">Percentage</option><option value="fixed">Fixed amount</option></select></label>
+        <label>Discount value<input name="discountValue" required type="number" min="0" step="0.01" defaultValue={editing === "new" ? 10 : editing.discountValue} /></label>
+        <label>Minimum purchase<input name="minPurchase" required type="number" min="0" step="0.01" defaultValue={editing === "new" ? 0 : editing.minPurchase} /></label>
+        <label>Expiration date<input name="expiryDate" required type="date" defaultValue={editing === "new" ? "" : editing.expiryDate.slice(0, 10)} /></label>
+        <label className="voucher-active"><input name="isActive" type="checkbox" defaultChecked={editing === "new" ? true : editing.isActive} />Active and available at checkout</label>
+      </div>
+      <Button type="submit"><Save />Save voucher</Button>
+    </form></div>}
+  </div>;
 }
 
 function ConsultationAdmin() {
@@ -1053,7 +1219,7 @@ function CustomerPortal() {
   const orderDetail: AdminOrder = { id: "SPC-24081", customer: customerName, email: "alex@example.com", type: "pickup", code: "CF-95X-2408", total: "$1,783.96", status: "Ready for pickup", payment: "Paid · Visa •4242", timestamp: "2026-03-16T10:42:00", items: ["GeForce RTX 4080 Super", "Ryzen 9 9950X", "In-store assembly"] };
   return (
     <div className="customer-portal">
-      <div className="portal-head"><div><span className="eyebrow light"><span /> CUSTOMER PROFILE</span><h1>WELCOME BACK,<br />{customerName.split(" ")[0].toUpperCase()}.</h1></div><div className="portal-user"><span>{customerName.split(" ").map((part) => part[0]).join("").slice(0, 2)}</span><div><strong>{customerName}</strong><small>alex@example.com</small></div><Link to="/login" onClick={() => { sessionStorage.removeItem("simplifyRole"); sessionStorage.removeItem("simplifyName"); window.dispatchEvent(new Event("simplify-auth")); }}>Log out</Link></div></div>
+      <div className="portal-head"><div><span className="eyebrow light"><span /> CUSTOMER PROFILE</span><h1>WELCOME BACK,<br />{customerName.split(" ")[0].toUpperCase()}.</h1></div><div className="portal-user"><span>{customerName.split(" ").map((part) => part[0]).join("").slice(0, 2)}</span><div><strong>{customerName}</strong><small>alex@example.com</small></div><Link to="/login" onClick={logoutApp}>Log out</Link></div></div>
       <nav className="portal-tabs">{([["orders", Package, "Orders & services"], ["history", Receipt, "Transactions"], ["profile", User, "Personal info"], ["addresses", MapPin, "Addresses"], ["payments", CreditCard, "Payments"], ["warranty", ShieldCheck, "Warranty"]] as const).map(([id, Icon, label]) => <button className={tab === id ? "active" : ""} onClick={() => setTab(id)} key={id}><Icon />{label}</button>)}</nav>
       <div className="portal-content">
         {tab === "orders" && <section><div className="portal-section-head"><div><span className="mono">03 ACTIVE</span><h2>Current orders & services</h2></div><Link to="/shop">Continue shopping <ArrowRight /></Link></div>
@@ -1078,74 +1244,166 @@ function PortalForm({ kicker, title, children, onSave, saved }: { kicker: string
   return <section><div className="portal-section-head"><div><span className="mono">{kicker}</span><h2>{title}</h2></div></div><form className="portal-form" onSubmit={(event) => { event.preventDefault(); onSave(); }}>{children}<Button type="submit">{saved ? <><Check />Changes saved</> : <><Save />Save changes</>}</Button></form></section>;
 }
 
+type PaymentMethod = "qris" | "gopay" | "bca" | "bri" | "alfamart" | "indomaret";
+type AppliedVoucher = { id: string; code: string; discount: number };
+type PaymentOrder = {
+  id: string;
+  orderNumber: string;
+  paymentMethod: PaymentMethod;
+  totalAmount: number;
+  paymentExpiresAt: string;
+  virtualAccountNumber?: string;
+  paymentStatus: string;
+};
+
+const paymentMethods: { id: PaymentMethod; group: string; name: string; detail: string; mark: string }[] = [
+  { id: "qris", group: "QR payment", name: "QRIS", detail: "Scan from any supported banking or wallet app", mark: "QR" },
+  { id: "gopay", group: "E-wallet", name: "GoPay", detail: "Pay instantly from your GoPay balance", mark: "GP" },
+  { id: "bca", group: "Virtual account", name: "BCA Virtual Account", detail: "ATM, mobile, or internet banking", mark: "BCA" },
+  { id: "bri", group: "Virtual account", name: "BRI Virtual Account", detail: "BRImo, ATM, or internet banking", mark: "BRI" },
+  { id: "alfamart", group: "Retail cash", name: "Alfamart", detail: "Show the payment code at the cashier", mark: "A" },
+  { id: "indomaret", group: "Retail cash", name: "Indomaret", detail: "Pay at your nearest store counter", mark: "I" },
+];
+
+const rupiah = (value: number) => `Rp${Math.round(value).toLocaleString("id-ID")}`;
+
 function Checkout() {
+  const navigate = useNavigate();
   const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
-  const [payment, setPayment] = useState<"card" | "wallet" | "store">("card");
-  const [complete, setComplete] = useState(false);
+  const [payment, setPayment] = useState<PaymentMethod>("qris");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
+  const [voucherError, setVoucherError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
   const items = [
-    { name: "GeForce RTX 4080 Super", spec: "16GB GDDR6X", price: 999, image: hardwareImages.gpu },
-    { name: "Ryzen 9 9950X", spec: "16-Core / AM5", price: 649, image: hardwareImages.cpu },
+    { name: "GeForce RTX 4080 Super", spec: "16GB GDDR6X", price: 15984000, image: hardwareImages.gpu, quantity: 1 },
+    { name: "Ryzen 9 9950X", spec: "16-Core / AM5", price: 10384000, image: hardwareImages.cpu, quantity: 1 },
   ];
-  if (complete) return <div className="order-complete"><span className="order-check"><Check /></span><span className="eyebrow light"><span /> ORDER CONFIRMED</span><h1>YOUR BUILD<br />STARTS HERE.</h1><p>Confirmation <b className="mono">SPC-24081</b> has been sent to your email. We&apos;ll notify you as soon as your order is ready.</p><div><Link to="/" className="btn btn-light">Return home</Link><Link to="/expert" className="btn btn-outline">Talk to an expert</Link></div></div>;
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const tax = subtotal * 0.0825;
+  const total = Math.max(0, subtotal + tax - (voucher?.discount || 0));
+
+  const applyVoucher = async () => {
+    setVoucherError("");
+    setVoucher(null);
+    const response = await fetch(`/api/app-vouchers?code=${encodeURIComponent(voucherCode)}&subtotal=${subtotal}`);
+    const data = await response.json() as { error?: string; discount?: number; voucher?: { id: string; code: string } };
+    if (!response.ok || !data.voucher) {
+      setVoucherError(data.error || "Voucher could not be applied.");
+      return;
+    }
+    setVoucher({ id: data.voucher.id, code: data.voucher.code, discount: Number(data.discount || 0) });
+  };
+
+  const createOrder = async () => {
+    setSubmitting(true);
+    setCheckoutError("");
+    const response = await fetch("/api/app-orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentMethod: payment, fulfillmentType: fulfillment, voucherId: voucher?.id, items }),
+    });
+    const data = await response.json() as { error?: string; order?: PaymentOrder };
+    setSubmitting(false);
+    if (!response.ok || !data.order) {
+      setCheckoutError(data.error || "Unable to create your payment.");
+      return;
+    }
+    sessionStorage.setItem("simplifyPaymentOrder", JSON.stringify(data.order));
+    navigate("/payment");
+  };
+
   return (
-    <div className="checkout-page">
-      <div className="checkout-top"><div><span className="eyebrow light"><span /> SECURE CHECKOUT</span><h1>COMPLETE<br />YOUR ORDER.</h1></div><div className="checkout-steps"><span className="active">01 Fulfillment</span><i /><span className="active">02 Payment</span><i /><span>03 Complete</span></div></div>
+    <div className="checkout-page payment-checkout">
+      <div className="checkout-top"><div><span className="eyebrow light"><span /> SECURE CHECKOUT</span><h1>CHOOSE HOW<br />YOU PAY.</h1></div><div className="checkout-steps"><span className="active">01 Fulfillment</span><i /><span className="active">02 Payment</span><i /><span>03 Confirmation</span></div></div>
       <div className="checkout-layout">
         <div className="checkout-forms">
-          <section className="checkout-section"><div className="checkout-section-title"><span className="mono">01</span><div><h2>Fulfillment</h2><p>How would you like to receive your order?</p></div></div>
-            <div className="fulfillment-options">
-              <button className={fulfillment === "delivery" ? "active" : ""} onClick={() => { setFulfillment("delivery"); if (payment === "store") setPayment("card"); }}><Truck /><div><strong>Home delivery</strong><span>2–4 business days · Free</span></div><span className="radio">{fulfillment === "delivery" && <span />}</span></button>
-              <button className={fulfillment === "pickup" ? "active" : ""} onClick={() => setFulfillment("pickup")}><Store /><div><strong>In-store pickup</strong><span>Ready in approximately 2 hours</span></div><span className="radio">{fulfillment === "pickup" && <span />}</span></button>
-            </div>
-            {fulfillment === "delivery" ? <div className="checkout-fields"><label>Full name<input placeholder="Alex Morgan" /></label><label>Email address<input type="email" placeholder="alex@example.com" /></label><label className="wide">Street address<input placeholder="123 Technology Drive" /></label><label>City<input placeholder="Austin" /></label><label>ZIP code<input placeholder="78701" /></label></div> : <div className="pickup-panel"><MapPin /><div><strong>simplify.pc Downtown</strong><span>1450 Market Street · Open today until 8 PM</span><small className="mono">PICKUP CODE GENERATED AFTER PAYMENT</small></div></div>}
+          <section className="checkout-section"><div className="checkout-section-title"><span className="mono">01</span><div><h2>Fulfillment</h2><p>Choose delivery or collect from our service center.</p></div></div>
+            <div className="fulfillment-options"><button className={fulfillment === "delivery" ? "active" : ""} onClick={() => setFulfillment("delivery")}><Truck /><div><strong>Home delivery</strong><span>2–4 business days · Free</span></div><span className="radio">{fulfillment === "delivery" && <span />}</span></button><button className={fulfillment === "pickup" ? "active" : ""} onClick={() => setFulfillment("pickup")}><Store /><div><strong>In-store pickup</strong><span>Ready in approximately 2 hours</span></div><span className="radio">{fulfillment === "pickup" && <span />}</span></button></div>
           </section>
-          <section className="checkout-section"><div className="checkout-section-title"><span className="mono">02</span><div><h2>Payment</h2><p>All transactions are encrypted and secure.</p></div></div>
-            <div className="payment-tabs">
-              <button className={payment === "card" ? "active" : ""} onClick={() => setPayment("card")}><CreditCard />Card</button>
-              <button className={payment === "wallet" ? "active" : ""} onClick={() => setPayment("wallet")}><Wallet />Digital wallet</button>
-              {fulfillment === "pickup" && <button className={payment === "store" ? "active" : ""} onClick={() => setPayment("store")}><Store />Pay at store</button>}
-            </div>
-            {payment === "card" && <div className="checkout-fields card-fields"><label className="wide">Card number<input placeholder="0000 0000 0000 0000" /></label><label>Expiry month<input type="month" min="2026-01" /></label><label>Security code<input placeholder="CVC" /></label><label className="wide">Name on card<input placeholder="Alex Morgan" /></label></div>}
-            {payment === "wallet" && <div className="wallet-options"><button>Pay</button><button>G Pay</button><p>You&apos;ll be redirected to your selected wallet to authorize payment.</p></div>}
-            {payment === "store" && <div className="pay-store-panel"><Store /><div><strong>Reserve now, pay at pickup</strong><p>Your items will be held for 24 hours. Bring your pickup code and a valid photo ID.</p></div></div>}
+          <section className="checkout-section"><div className="checkout-section-title"><span className="mono">02</span><div><h2>Payment method</h2><p>Select a secure local payment channel.</p></div></div>
+            <div className="gateway-list">{paymentMethods.map((method) => <button key={method.id} className={payment === method.id ? "active" : ""} onClick={() => setPayment(method.id)}><span className="gateway-radio"><i /></span><span className="gateway-mark">{method.mark}</span><span><small>{method.group}</small><strong>{method.name}</strong><em>{method.detail}</em></span><ChevronRight /></button>)}</div>
+            {payment === "qris" && <div className="qris-preview"><div className="qris-copy"><span className="mono">QRIS PREVIEW</span><h3>Scan to pay simplify.pc</h3><p>Your final QR code is generated when the order is confirmed.</p><strong>{rupiah(total)}</strong></div><div className="qr-frame"><QRCodeSVG value={`https://simplify.pc/pay/preview?amount=${Math.round(total)}`} size={168} level="M" /></div></div>}
           </section>
+          <section className="checkout-section voucher-box"><div><span className="voucher-spark">%</span><div><h2>Pakai promo biar makin hemat!</h2><p>Enter a voucher managed by the simplify.pc team.</p></div></div><div className="voucher-entry"><input value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} placeholder="Enter voucher code" /><button onClick={applyVoucher} disabled={!voucherCode.trim()}>Apply</button></div>{voucher && <p className="voucher-success"><Check />{voucher.code} applied · You save {rupiah(voucher.discount)}</p>}{voucherError && <p className="voucher-error">{voucherError}</p>}</section>
         </div>
-        <aside className="checkout-summary"><span className="mono">ORDER SUMMARY</span><h2>2 ITEMS</h2>
-          <div className="summary-items">{items.map((item) => <div key={item.name}><img src={item.image} alt={item.name} /><div><strong>{item.name}</strong><span>{item.spec} · Qty 1</span></div><b>${item.price.toLocaleString()}</b></div>)}</div>
-          <div className="summary-costs"><div><span>Subtotal</span><b>$1,648.00</b></div><div><span>Shipping</span><b>{fulfillment === "delivery" ? "FREE" : "PICKUP"}</b></div><div><span>Estimated tax</span><b>$135.96</b></div><div className="summary-total"><span>Total</span><strong>$1,783.96</strong></div></div>
-          <Button onClick={() => setComplete(true)}>{payment === "store" ? "Reserve order" : "Complete order"} <ArrowRight /></Button>
-          <p className="secure-note"><ShieldCheck /> Secure 256-bit encrypted checkout</p>
-        </aside>
+        <aside className="checkout-summary"><span className="mono">ORDER SUMMARY</span><h2>{items.length} ITEMS</h2><div className="summary-items">{items.map((item) => <div key={item.name}><img src={item.image} alt={item.name} /><div><strong>{item.name}</strong><span>{item.spec} · Qty {item.quantity}</span></div><b>{rupiah(item.price)}</b></div>)}</div><div className="summary-costs"><div><span>Subtotal</span><b>{rupiah(subtotal)}</b></div><div><span>Shipping</span><b>{fulfillment === "delivery" ? "FREE" : "PICKUP"}</b></div><div><span>Estimated tax</span><b>{rupiah(tax)}</b></div>{voucher && <div className="summary-discount"><span>Voucher · {voucher.code}</span><b>−{rupiah(voucher.discount)}</b></div>}<div className="summary-total"><span>Total</span><strong>{rupiah(total)}</strong></div></div>{checkoutError && <p className="checkout-error">{checkoutError}</p>}<Button onClick={createOrder} disabled={submitting}>{submitting ? "Creating payment…" : `Pay with ${paymentMethods.find((item) => item.id === payment)?.name}`} <ArrowRight /></Button><p className="secure-note"><ShieldCheck /> Payment details are encrypted and verified server-side</p></aside>
       </div>
     </div>
   );
+}
+
+function PaymentWaiting() {
+  const [order] = useState<PaymentOrder | null>(() => {
+    try { return JSON.parse(sessionStorage.getItem("simplifyPaymentOrder") || "null") as PaymentOrder | null; } catch { return null; }
+  });
+  const [remaining, setRemaining] = useState(0);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [copied, setCopied] = useState("");
+
+  useEffect(() => {
+    if (!order) return;
+    const update = () => setRemaining(Math.max(0, Math.floor((new Date(order.paymentExpiresAt).getTime() - Date.now()) / 1000)));
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [order]);
+
+  if (!order) return <div className="payment-empty"><Receipt /><h1>No pending payment</h1><p>Complete checkout to generate your payment instructions.</p><Link to="/checkout" className="btn btn-dark">Return to checkout</Link></div>;
+
+  const hours = String(Math.floor(remaining / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+  const seconds = String(remaining % 60).padStart(2, "0");
+  const method = paymentMethods.find((item) => item.id === order.paymentMethod) || paymentMethods[0];
+  const copy = async (value: string, label: string) => { await navigator.clipboard?.writeText(value); setCopied(label); window.setTimeout(() => setCopied(""), 1800); };
+  const paymentValue = `${order.orderNumber}:${order.totalAmount}`;
+
+  return <div className="payment-waiting">
+    <header><Link to="/" className="brand brand-logo"><span className="brand-mark"><span /></span><span className="brand-name">simplify.pc</span></Link><span className="secure-checkout"><ShieldCheck />Secure payment</span></header>
+    <main>
+      <div className="waiting-title"><span className="mono">ORDER {order.orderNumber}</span><h1>Selesaikan pembayaran</h1><p>Complete the payment before the timer expires. Your inventory is reserved until then.</p></div>
+      <section className="countdown-card"><span>Pay before this time runs out</span><div><strong>{hours}</strong><i>:</i><strong>{minutes}</strong><i>:</i><strong>{seconds}</strong></div><small>HOURS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MINUTES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SECONDS</small></section>
+      <div className="waiting-grid">
+        <section className="payment-instrument"><div className="method-heading"><span className="gateway-mark large">{method.mark}</span><div><small>{method.group}</small><h2>{method.name}</h2></div><span className="waiting-badge">Waiting for payment</span></div>
+          {order.paymentMethod === "qris" ? <div className="payment-qr"><div className="qr-frame"><QRCodeSVG value={paymentValue} size={236} level="H" includeMargin /></div><strong>simplify.pc</strong><span>Scan with your preferred banking or wallet app</span></div> : <div className="virtual-account"><span>Virtual account / payment code</span><div><strong>{order.virtualAccountNumber}</strong><button onClick={() => copy(order.virtualAccountNumber || "", "account")}><Clipboard />{copied === "account" ? "Copied" : "Copy"}</button></div><small>Use the exact number above to avoid payment delays.</small></div>}
+        </section>
+        <aside className="bill-card"><span className="mono">TOTAL BILL</span><div className="bill-amount"><strong>{rupiah(order.totalAmount)}</strong><button onClick={() => copy(String(order.totalAmount), "amount")} aria-label="Copy total amount"><Clipboard /></button></div><p>Make sure the amount transferred matches the bill exactly.</p><div className="bill-divider" /><button className="instruction-toggle" onClick={() => setInstructionsOpen(!instructionsOpen)}>Lihat Cara Bayar <ChevronDown className={instructionsOpen ? "rotate" : ""} /></button>{instructionsOpen && <ol><li>Open your banking or wallet application.</li><li>Select QRIS or the matching transfer channel.</li><li>Scan or enter the payment code, then confirm the exact total.</li></ol>}<button className="status-check" onClick={() => setStatusMessage("We haven’t received your payment yet. We’ll check again automatically.")}>Cek Status Bayar <ArrowRight /></button>{statusMessage && <p className="status-message">{statusMessage}</p>}</aside>
+      </div>
+      <div className="payment-help"><ShieldCheck /><div><strong>Your order is safely reserved</strong><span>Need help? Contact simplify.pc support and quote {order.orderNumber}.</span></div><Link to="/account">View my orders</Link></div>
+    </main>
+  </div>;
 }
 
 function NotFound() {
   return <div className="diagnostic-result"><span className="mono">ERROR 404</span><h1>PAGE NOT<br />INSTALLED.</h1><Link to="/" className="btn btn-dark">Return home</Link></div>;
 }
 
-export const router = createBrowserRouter([
-  {
-    path: "/",
-    Component: Layout,
-    children: [
-      { index: true, Component: Home },
-      { path: "shop", Component: Shop },
-      { path: "product/:id", Component: ProductDetail },
-      { path: "prebuilt", Component: PrebuiltCatalog },
-      { path: "prebuilt/:id", Component: PrebuiltDetail },
-      { path: "builder", Component: Builder },
-      { path: "services", Component: Services },
-      { path: "diagnose", Component: Diagnose },
-      { path: "expert", Component: ExpertAdvice },
-      { path: "community", Component: Community },
-      { path: "community/:slug", Component: CommunityThread },
-      { path: "checkout", Component: Checkout },
-      { path: "login", Component: Login },
-      { path: "admin", Component: AdminDashboard },
-      { path: "account", Component: CustomerPortal },
-      { path: "*", Component: NotFound },
-    ],
-  },
-]);
+export function createAppRouter() {
+  return createBrowserRouter([
+    {
+      path: "/",
+      Component: Layout,
+      children: [
+        { index: true, Component: Home },
+        { path: "shop", Component: Shop },
+        { path: "product/:id", Component: ProductDetail },
+        { path: "prebuilt", Component: PrebuiltCatalog },
+        { path: "prebuilt/:id", Component: PrebuiltDetail },
+        { path: "builder", Component: Builder },
+        { path: "services", Component: Services },
+        { path: "diagnose", Component: Diagnose },
+        { path: "expert", Component: ExpertAdvice },
+        { path: "community", Component: Community },
+        { path: "community/:slug", Component: CommunityThread },
+        { path: "checkout", Component: Checkout },
+        { path: "payment", Component: PaymentWaiting },
+        { path: "login", Component: Login },
+        { path: "staff", Component: AdminDashboard },
+        { path: "account", Component: CustomerPortal },
+        { path: "*", Component: NotFound },
+      ],
+    },
+  ]);
+}

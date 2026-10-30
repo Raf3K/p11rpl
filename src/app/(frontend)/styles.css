@@ -4664,3 +4664,155 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     flex-direction: column;
   }
 }
+
+.figma-custom-code-fragment { display: contents; }
+
+/* Payment gateway, waiting state, and promotion management */
+.app-loading { min-height: 100vh; display: grid; place-items: center; background: var(--paper); color: var(--ink); font: 11px "JetBrains Mono"; letter-spacing: .12em; text-transform: uppercase; }
+.login-message { border-left: 2px solid #22c55e; color: #b9f6ca; padding-left: 10px; font-size: 9px; line-height: 1.6; }
+.auth-back { align-self: flex-start; border: 0; background: transparent; color: #8b8b92; display: flex; gap: 8px; align-items: center; font-size: 9px; margin: 14px 0; }
+.auth-back svg { width: 14px; }
+.login-card .btn:disabled, .checkout-summary .btn:disabled { opacity: .58; cursor: wait; }
+
+.payment-checkout .checkout-layout { grid-template-columns: minmax(0, 1fr) 430px; }
+.gateway-list { display: flex; flex-direction: column; gap: 10px; }
+.gateway-list > button { width: 100%; min-height: 82px; display: grid; grid-template-columns: 20px 50px 1fr auto; align-items: center; gap: 15px; padding: 14px 18px; border: 1px solid #303036; background: #111115; color: white; text-align: left; transition: border-color .2s, background .2s, transform .2s; }
+.gateway-list > button:hover { transform: translateY(-1px); border-color: #6b6b72; }
+.gateway-list > button.active { border-color: var(--blue); background: #101b2e; box-shadow: inset 3px 0 var(--blue); }
+.gateway-list > button > span:nth-child(3) { display: flex; flex-direction: column; gap: 3px; }
+.gateway-list small { color: #666b74; font: 7px "JetBrains Mono"; letter-spacing: .08em; text-transform: uppercase; }
+.gateway-list strong { font-size: 12px; }
+.gateway-list em { color: #747982; font-size: 9px; font-style: normal; }
+.gateway-list svg { width: 15px; color: #565b64; }
+.gateway-radio { width: 17px; height: 17px; border: 1px solid #5e626b; border-radius: 50%; display: grid; place-items: center; }
+.gateway-list .active .gateway-radio { border-color: var(--blue); }
+.gateway-list .active .gateway-radio i { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+.gateway-mark { width: 46px; height: 38px; display: grid; place-items: center; background: white; color: #111; border-radius: 6px; font: 700 9px "Space Grotesk"; }
+.gateway-mark.large { width: 58px; height: 48px; font-size: 11px; }
+.qris-preview { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding: 24px; border: 1px solid #303036; background: #09090b; }
+.qris-copy h3 { margin: 9px 0 8px; font-size: 21px; }
+.qris-copy p { color: #747982; font-size: 10px; line-height: 1.6; }
+.qris-copy > strong { display: block; margin-top: 20px; font-size: 24px; }
+.qr-frame { background: white; border-radius: 10px; padding: 12px; line-height: 0; }
+.voucher-box > div:first-child { display: flex; gap: 14px; align-items: center; }
+.voucher-box h2 { margin: 0 0 5px; font-size: 20px; }
+.voucher-box p { margin: 0; color: #747982; font-size: 10px; }
+.voucher-spark { width: 42px; height: 42px; display: grid; place-items: center; background: var(--blue); font-size: 18px; font-weight: 700; }
+.voucher-entry { margin-top: 20px; display: grid; grid-template-columns: 1fr auto; }
+.voucher-entry input { height: 50px; border: 1px solid #303036; background: #111115; color: white; padding: 0 15px; outline: 0; text-transform: uppercase; }
+.voucher-entry input:focus { border-color: var(--blue); }
+.voucher-entry button { border: 0; background: var(--blue); color: white; padding: 0 24px; font-weight: 600; }
+.voucher-entry button:disabled { opacity: .4; }
+.voucher-box .voucher-success { margin-top: 13px; color: #89e9a4; display: flex; gap: 8px; align-items: center; }
+.voucher-success svg { width: 15px; }
+.voucher-box .voucher-error, .checkout-error { margin-top: 13px; color: #ff9898; line-height: 1.5; }
+.summary-discount { color: #8ce9a6; }
+
+.payment-waiting { min-height: 100vh; background: #f3f4f6; color: #0f172a; font-family: "Space Grotesk", sans-serif; }
+.payment-waiting > header { height: 76px; display: flex; justify-content: space-between; align-items: center; padding: 0 5vw; background: #0066ff; color: white; }
+.payment-waiting .brand-name { color: white; }
+.payment-waiting .brand-mark { background: white; }
+.payment-waiting .brand-mark span { background: #0066ff; }
+.secure-checkout { display: flex; align-items: center; gap: 8px; font: 8px "JetBrains Mono"; letter-spacing: .08em; text-transform: uppercase; }
+.secure-checkout svg { width: 16px; }
+.payment-waiting main { max-width: 1120px; margin: auto; padding: 65px 28px 100px; }
+.waiting-title { text-align: center; max-width: 620px; margin: auto; }
+.waiting-title .mono { color: #0066ff; }
+.waiting-title h1 { margin: 12px 0; font-size: clamp(38px, 5vw, 64px); letter-spacing: -.055em; }
+.waiting-title p { color: #64748b; line-height: 1.7; }
+.countdown-card { max-width: 620px; margin: 35px auto 45px; background: #0f172a; color: white; text-align: center; padding: 24px; border-radius: 12px; box-shadow: 0 18px 45px #0f172a1f; }
+.countdown-card > span { color: #94a3b8; font-size: 10px; }
+.countdown-card > div { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 9px 0 5px; }
+.countdown-card strong { font: 500 40px "JetBrains Mono"; min-width: 62px; }
+.countdown-card i { color: #64748b; font-style: normal; font-size: 28px; }
+.countdown-card small { color: #64748b; font: 6px "JetBrains Mono"; letter-spacing: .1em; }
+.waiting-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 22px; align-items: stretch; }
+.payment-instrument, .bill-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 30px; box-shadow: 0 10px 35px #0f172a0d; }
+.method-heading { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+.method-heading small { color: #64748b; font: 7px "JetBrains Mono"; text-transform: uppercase; }
+.method-heading h2 { margin: 4px 0 0; font-size: 20px; }
+.waiting-badge { padding: 8px 10px; border-radius: 999px; background: #fff7ed; color: #c2410c; font: 7px "JetBrains Mono"; text-transform: uppercase; }
+.payment-qr { display: flex; flex-direction: column; align-items: center; padding: 28px 0 4px; }
+.payment-qr .qr-frame { border: 1px solid #e2e8f0; box-shadow: 0 8px 28px #0f172a12; }
+.payment-qr > strong { margin-top: 17px; font-size: 15px; }
+.payment-qr > span { color: #64748b; margin-top: 5px; font-size: 10px; }
+.virtual-account { padding: 38px 0 18px; }
+.virtual-account > span { color: #64748b; font-size: 10px; }
+.virtual-account > div { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 11px 0; }
+.virtual-account strong { font: 500 clamp(22px, 3vw, 34px) "JetBrains Mono"; letter-spacing: .03em; }
+.virtual-account button { border: 1px solid #e2e8f0; background: #f8fafc; padding: 10px 13px; display: flex; align-items: center; gap: 7px; font-size: 9px; }
+.virtual-account button svg { width: 14px; }
+.virtual-account small { color: #94a3b8; }
+.bill-card > .mono { color: #64748b; }
+.bill-amount { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 14px 0 8px; }
+.bill-amount strong { font-size: clamp(27px, 3vw, 38px); letter-spacing: -.04em; }
+.bill-amount button { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 7px; }
+.bill-amount svg { width: 16px; }
+.bill-card > p { color: #64748b; font-size: 10px; line-height: 1.6; }
+.bill-divider { height: 1px; background: #e2e8f0; margin: 24px 0; }
+.instruction-toggle, .status-check { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; border: 0; background: transparent; color: #0f172a; font-weight: 600; }
+.instruction-toggle svg, .status-check svg { width: 16px; transition: transform .2s; }
+.instruction-toggle svg.rotate { transform: rotate(180deg); }
+.bill-card ol { color: #64748b; font-size: 10px; line-height: 1.7; padding-left: 19px; }
+.status-check { margin-top: 12px; padding: 0 16px; background: #0066ff; color: white; border-radius: 7px; }
+.status-message { padding: 11px; background: #eff6ff; border-radius: 7px; color: #1d4ed8 !important; }
+.payment-help { margin-top: 22px; padding: 20px 24px; border: 1px solid #e2e8f0; background: white; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 15px; border-radius: 12px; }
+.payment-help > svg { color: #0066ff; }
+.payment-help div { display: flex; flex-direction: column; gap: 3px; }
+.payment-help span { color: #64748b; font-size: 9px; }
+.payment-help a { color: #0066ff; font-size: 10px; font-weight: 600; }
+.payment-empty { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #f3f4f6; color: #0f172a; }
+.payment-empty > svg { width: 42px; height: 42px; color: #0066ff; }
+.payment-empty h1 { font-size: 42px; letter-spacing: -.05em; margin: 18px 0 5px; }
+.payment-empty p { color: #64748b; margin-bottom: 24px; }
+
+.voucher-admin > .panel-heading { background: white; border: 1px solid #ddd; padding: 25px; }
+.voucher-admin .panel-heading p { color: #777; font-size: 10px; margin: 5px 0 0; }
+.voucher-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+.voucher-grid article { background: white; border: 1px solid #ddd; padding: 22px; min-height: 200px; display: flex; flex-direction: column; }
+.voucher-grid article.inactive { opacity: .58; }
+.voucher-grid article > div:first-child { display: flex; justify-content: space-between; align-items: center; }
+.voucher-grid article > div:first-child strong { font: 600 15px "JetBrains Mono"; }
+.voucher-grid article > b { font-size: 28px; margin-top: 26px; }
+.voucher-grid article > p { color: #777; font-size: 9px; }
+.voucher-grid article > div:last-child { display: flex; gap: 8px; margin-top: auto; }
+.voucher-grid article button { border: 1px solid #ddd; background: #f8f8f8; min-height: 34px; padding: 0 10px; display: flex; gap: 6px; align-items: center; font-size: 8px; }
+.voucher-grid article button svg { width: 13px; }
+.voucher-grid article button.danger { color: #b91c1c; }
+.voucher-empty { grid-column: 1 / -1; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; background: white; border: 1px dashed #ccc; color: #777; }
+.voucher-empty svg { width: 28px; }
+.voucher-active { grid-column: 1 / 3; flex-direction: row !important; align-items: center; }
+.voucher-active input { width: 16px; height: 16px; }
+.admin-alert { padding: 12px; background: #fee2e2; color: #991b1b; }
+
+:root[data-theme="dark"] .payment-waiting { background: #000; color: #fff; }
+:root[data-theme="dark"] .payment-waiting > header { background: #000; border-bottom: 1px solid #2a2a2a; }
+:root[data-theme="dark"] .payment-waiting .brand-mark { background: #fff; }
+:root[data-theme="dark"] .payment-waiting .brand-mark span { background: #000; }
+:root[data-theme="dark"] .waiting-title .mono, :root[data-theme="dark"] .payment-help > svg, :root[data-theme="dark"] .payment-help a { color: #fff; }
+:root[data-theme="dark"] .countdown-card, :root[data-theme="dark"] .payment-instrument, :root[data-theme="dark"] .bill-card, :root[data-theme="dark"] .payment-help { background: #121212; border-color: #2a2a2a; box-shadow: none; }
+:root[data-theme="dark"] .method-heading, :root[data-theme="dark"] .bill-divider { border-color: #2a2a2a; }
+:root[data-theme="dark"] .gateway-mark { background: #fff; color: #000; }
+:root[data-theme="dark"] .status-check { background: #fff; color: #000; }
+:root[data-theme="dark"] .status-message { background: #242424; color: #ddd !important; }
+:root[data-theme="dark"] .bill-amount button, :root[data-theme="dark"] .virtual-account button { background: #1b1b1b; color: #fff; border-color: #333; }
+
+@media (max-width: 900px) {
+  .payment-checkout .checkout-layout, .waiting-grid { grid-template-columns: 1fr; }
+  .payment-checkout .checkout-summary { position: static; }
+  .voucher-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .gateway-list > button { grid-template-columns: 18px 42px 1fr; padding: 12px; }
+  .gateway-list > button > svg { display: none; }
+  .qris-preview { grid-template-columns: 1fr; }
+  .qris-preview .qr-frame { justify-self: center; }
+  .countdown-card > div { gap: 7px; }
+  .countdown-card strong { font-size: 28px; min-width: 50px; }
+  .method-heading { grid-template-columns: auto 1fr; }
+  .waiting-badge { grid-column: 1 / -1; justify-self: start; }
+  .payment-instrument, .bill-card { padding: 20px; }
+  .payment-help { grid-template-columns: auto 1fr; }
+  .payment-help a { grid-column: 2; }
+  .voucher-grid { grid-template-columns: 1fr; }
+}
