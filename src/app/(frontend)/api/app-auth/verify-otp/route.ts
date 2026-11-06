@@ -1,4 +1,5 @@
 import config from '@payload-config'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import {
@@ -11,12 +12,8 @@ import {
 export async function POST(request: Request) {
   const body = (await request.json()) as Record<string, unknown>
   const code = String(body.code || '').trim()
-  const pendingToken = request.headers
-    .get('cookie')
-    ?.split(';')
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${OTP_SESSION_COOKIE}=`))
-    ?.slice(OTP_SESSION_COOKIE.length + 1)
+  const pendingCookie = (await cookies()).get(OTP_SESSION_COOKIE)?.value
+  const pendingToken = pendingCookie ? decodeURIComponent(pendingCookie) : undefined
 
   const user = await getAppUserFromToken(pendingToken)
   if (!user) return Response.json({ error: 'Your verification session expired.' }, { status: 401 })

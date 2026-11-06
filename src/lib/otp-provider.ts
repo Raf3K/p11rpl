@@ -3,7 +3,7 @@ import 'server-only'
 const DEVELOPMENT_OTP = '111111'
 
 export function currentOtpCode() {
-  return process.env.OTP_STATIC_CODE || DEVELOPMENT_OTP
+  return DEVELOPMENT_OTP
 }
 
 async function deliverMessage(destination: string, message: string) {
